@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Services.Roles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Controllers.Roles
@@ -14,8 +9,8 @@ namespace API.Controllers.Roles
     [Route("api/Roles")]
     [EnableCors("AllowOrigin")]
     [ApiController]
-    [Authorize("Admin")]
-    public class RoleController : ControllerBase
+    [Authorize(Policy ="Admin")]
+    public class RoleController : BaseController
     {
         private readonly IRoleService _roleService;
         public RoleController(IRoleService roleService)

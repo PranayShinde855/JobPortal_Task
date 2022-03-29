@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -18,7 +19,7 @@ namespace API.Controllers
     [Route("api/Account")]
     [EnableCors("AllowOrigin")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class AccountController : BaseController
     {
         protected readonly IUserService _userSerivce;
         protected readonly IRoleService _roleSerivce;
@@ -35,7 +36,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        //[Authorize("Admin")]
+        [Authorize(Policy ="Admin")]
         [Route("AdminRegistration")]
         public async Task<IActionResult> AddAdmin(Models.Users user)
         {
@@ -53,9 +54,10 @@ namespace API.Controllers
             return BadRequest();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("UserRegistration")]
-        public async Task<IActionResult> AddUser(Models.Users user)
+        public async Task<IActionResult> UserRegistration(Models.Users user)
         {
             if (ModelState.IsValid)
             {
@@ -67,7 +69,7 @@ namespace API.Controllers
                 }
                 return BadRequest("This email address is already taken. Please use another eamil address.");
             }
-            return BadRequest();
+            return BadRequest("Model does not contains the attributes which are required.");
         }
 
         [HttpPost]
@@ -87,6 +89,7 @@ namespace API.Controllers
             return BadRequest();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("Login")]
         public async Task<IActionResult> Login(string email, string password)
@@ -128,6 +131,7 @@ namespace API.Controllers
             return Unauthorized();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("ForgeotPassword")]
         public async Task<IActionResult> ForgotPassword(string email)
@@ -145,6 +149,7 @@ namespace API.Controllers
             return BadRequest();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("ResetPassword")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDTO dto)
