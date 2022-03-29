@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Models
 {
@@ -11,5 +7,7 @@ namespace Models
         public int Id { get; set; }
         public int JobId { get; set; }
         public int AppliedBy { get; set; }
+        public DateTime AppliedDate { get; set; }
+        public bool IsActive { get; set; }
     }
 }

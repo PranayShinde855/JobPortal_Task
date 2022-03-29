@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Services.Jobs;
+using Services.UserServices;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Controllers.Jobs
@@ -17,11 +15,13 @@ namespace API.Controllers.Jobs
     public class JobsController : ControllerBase
     {
         private readonly IJobService _jobService;
+        private readonly IUserService _userService;
         private readonly IAppliedJobsService _appliedJobsService;
-        public JobsController(IJobService jobService, IAppliedJobsService appliedJobsService)
+        public JobsController(IJobService jobService, IAppliedJobsService appliedJobsService, IUserService userService)
         {
             _jobService = jobService;
             _appliedJobsService = appliedJobsService;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -50,7 +50,7 @@ namespace API.Controllers.Jobs
 
         [HttpPost]
         [Route("AddJob")]
-        [Authorize("User")]
+        //[Authorize("User")]
         public async Task<IActionResult> AddJob(Job job)
         {
             var info = await _jobService.Add(job);
@@ -62,7 +62,7 @@ namespace API.Controllers.Jobs
 
         [HttpPut]
         [Route("UpdateJob")]
-        [Authorize("Recruter")]
+        //[Authorize("Recruiter")]
         public async Task<IActionResult> UpdateJobById(Job job)
         {
             var info = await _jobService.Update(job);
@@ -74,7 +74,7 @@ namespace API.Controllers.Jobs
 
         [HttpDelete]
         [Route("DeleteJob")]
-        [Authorize("Recruter")]
+        //[Authorize("Recruiter")]
         public async Task<IActionResult> DeleteJob(int id)
         {
             var info = await _jobService.Delete(id);
@@ -86,19 +86,27 @@ namespace API.Controllers.Jobs
 
         [HttpPost]
         [Route("ApplyJob")]
-        [Authorize("User")]
+        //[Authorize("User")]
         public async Task<IActionResult> ApplyJob(AppliedJob appliedJob)
         {
             if(ModelState.IsValid)
             {
-                return Ok(await _appliedJobsService.Add(appliedJob));
+                try
+                {
+                    var appliedJobStatus = await _appliedJobsService.Add(appliedJob);
+                    return Ok(appliedJob);
+                }
+                catch(Exception ex)
+                {
+                    throw ex;
+                }
             }
             return BadRequest();
         }
 
         [HttpGet]
         [Route("GetAllJobsAppliedByMe")]
-        [Authorize("Recruter")]
+        //[Authorize("Recruiter")]
         public async Task<IActionResult> GetAllJobsAppliedByMe(int userId)
         {
             if (ModelState.IsValid)
@@ -111,7 +119,7 @@ namespace API.Controllers.Jobs
 
         [HttpGet]
         [Route("GetAllApplicantAppliedToMyJobs")]
-        [Authorize("Recruter")]
+        //[Authorize("Recruiter")]
         public async Task<IActionResult> GetAllApplicantAppliedToMyJobs(int userId)
         {
             if (ModelState.IsValid)
@@ -123,27 +131,15 @@ namespace API.Controllers.Jobs
         }
 
         [HttpGet]
-        [Authorize("User")]
-        //[Authorize("AllAllowed")]
+        //[Authorize("User")]
         [Route("GetAllAppliedJobs")]
         public async Task<IActionResult> GetAllAppliedJobs()
         {
             return Ok(await _appliedJobsService.GetAll());
         }
 
-        //[HttpGet]
-        //[Route("GetAppliedJob")]
-        //public async Task<IActionResult> GetAppliedJob(int id)
-        //{
-        //    if (id != null)
-        //    {
-        //        var data = await _appliedJobsService.GetById(id);
-        //        return Ok(data);
-        //    }
-        //    return NotFound();
-        //}
-
         [HttpPut]
+        //[Authorize("User")]
         [Route("UpdateAppliedJob")]
         public async Task<IActionResult> UpdateAppliedJob(AppliedJob appliedJob)
         {
@@ -155,7 +151,7 @@ namespace API.Controllers.Jobs
         }
 
         [HttpDelete]
-        [Authorize("User")]
+        //[Authorize("User")]
         [Route("DeleteAppliedJob")]
         public async Task<IActionResult> DeleteAppliedJob(int id)
         {

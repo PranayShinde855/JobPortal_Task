@@ -1,9 +1,7 @@
 ﻿using Database.Repository;
 using Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.Jobs
@@ -24,6 +22,9 @@ namespace Services.Jobs
             obj.Skills = job.Skills;
             obj.Location = job.Location;
             obj.CreatedBy = job.CreatedBy;
+            obj.ModifiedBy = job.CreatedBy;
+            obj.CreatedDate = DateTime.Now;
+            obj.ModifiedDate = DateTime.Now;
             obj.IsActive = true;
             _jobsRepository.Add(obj);
             return obj;
@@ -55,9 +56,10 @@ namespace Services.Jobs
                 getById.Description = job.Description;
                 getById.Skills = job.Skills;
                 getById.Location = job.Location;
-                getById.CreatedBy = job.CreatedBy;
+                getById.ModifiedBy = job.CreatedBy;
+                getById.ModifiedDate = DateTime.Now;
                 getById.IsActive = true;
-                _jobsRepository.Update(getById);
+                await _jobsRepository.Update(getById);
                 return getById;
             }
             return getById;

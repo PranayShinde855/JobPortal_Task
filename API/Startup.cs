@@ -34,7 +34,7 @@ namespace API
             options.UseSqlServer(Configuration.GetConnectionString("Connection")));
 
             services.AddScoped<IUserRepository, UserRepository>()
-                .AddScoped<IUserSerivce, UserService>();
+                .AddScoped<IUserService, UserService>();
 
             services.AddScoped<IRoleRepository, RoleRepository>()
                 .AddScoped<IRoleService, RoleService>();
@@ -47,6 +47,8 @@ namespace API
 
             services.AddScoped<IOTPRepository, OTPRepository>()
                 .AddScoped<IOTPService, OTPService>();
+
+            services.AddCors();
 
             services.AddAuthentication(options =>
             {
@@ -71,7 +73,7 @@ namespace API
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Recruter", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("Recruiter", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("AllAllowed", policy => policy.RequireRole("Admin", "Recruiter", "User"));
                 options.AddPolicy("User", policy => policy.RequireRole("Admin", "User"));
                 options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
@@ -127,6 +129,8 @@ namespace API
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors();
 
             app.UseEndpoints(endpoints =>
             {

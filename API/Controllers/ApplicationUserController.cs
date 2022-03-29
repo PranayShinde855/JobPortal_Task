@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Services.UserServices;
 using System.Threading.Tasks;
 
@@ -11,8 +10,8 @@ namespace API.Controllers.Users
     [ApiController]
     public class ApplicationUserController : ControllerBase
     {
-        protected readonly IUserSerivce _userSerivce;
-        public ApplicationUserController(IUserSerivce userSerivce)
+        protected readonly IUserService _userSerivce;
+        public ApplicationUserController(IUserService userSerivce)
         {
             _userSerivce = userSerivce;
         }
@@ -31,7 +30,7 @@ namespace API.Controllers.Users
             {
                 return Ok(await _userSerivce.GetById(Id));
             }
-            return NotFound();
+            return NotFound("UserId not found.");
         }
 
 
@@ -54,7 +53,7 @@ namespace API.Controllers.Users
             {
                 return Ok(await _userSerivce.Delete(Id));
             }
-            return NotFound();
+            return NotFound("UserId not found.");
         }
     }
 }

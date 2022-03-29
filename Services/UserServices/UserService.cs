@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Models;
 using Models.DTOs;
+using Services.OTPService;
 using System;
 using System.Linq;
 using System.Net;
@@ -10,11 +11,12 @@ using System.Threading.Tasks;
 
 namespace Services.UserServices
 {
-    public class UserService : IUserSerivce
+    public class UserService : IUserService
     {
         protected readonly IUserRepository _userRepository;
         protected readonly IConfiguration _configuration;
         protected readonly IOTPRepository _oTPRepository;
+        protected readonly IOTPService _oTPService;
         public UserService(IUserRepository userRepositor, IConfiguration configuration, IOTPRepository oTPRepository)
         {
             _userRepository = userRepositor;
@@ -32,6 +34,10 @@ namespace Services.UserServices
                 data.Password = user.Password;
                 data.Email = user.Email;
                 data.RoleId = 3;
+                data.CreatedBy = 0;
+                data.ModifiedBy = 0;
+                data.CreatedDate = DateTime.Now;
+                data.ModifiedDate = DateTime.Now;
                 data.IsActive = true;
                  _userRepository.Add(data);
                 return user;
@@ -41,7 +47,7 @@ namespace Services.UserServices
                 throw ex;
             }
         }
-        public async Task<Users> AddRecrtuter(Users user)
+        public async Task<Users> AddRecruiter(Users user)
         {
             try
             {
@@ -51,6 +57,10 @@ namespace Services.UserServices
                 data.Password = user.Password;
                 data.Email = user.Email;
                 data.RoleId = 2;
+                data.CreatedBy = 0;
+                data.ModifiedBy = 0;
+                data.CreatedDate = DateTime.Now;
+                data.ModifiedDate = DateTime.Now;
                 data.IsActive = true;
                 _userRepository.Add(data);
                 return user;
@@ -101,7 +111,8 @@ namespace Services.UserServices
                     getdata.Address = user.Address;
                     getdata.Password = user.Password;
                     getdata.Email = user.Email;
-                    getdata.RoleId = Convert.ToInt32(user.RoleId);
+                    getdata.ModifiedBy = Id;
+                    getdata.ModifiedDate = DateTime.Now;
                     await _userRepository.Update(getdata);
                     return user;
                 }
@@ -118,7 +129,7 @@ namespace Services.UserServices
             return await _userRepository.GetDefault(x => x.Email == email && x.Password == password);
         }
 
-        public async Task<bool> SendEmail(string to, string subject, string message)
+        public async Task<bool> FireEmail(string to, string subject, string message)
         {
             try
             {
@@ -164,5 +175,53 @@ namespace Services.UserServices
 
             return false;
         }
+
+        public async Task<bool> CheckEmailIdExist(string eamilId)
+        {
+            var check = await _userRepository.GetDefault(x => x.Email == eamilId);
+            if (check != null)
+                return true;
+            return false;
+        }
+
+        public async Task<Users> AddAdmin(Users user)
+        {
+            try
+            {
+                Users data = new Users();
+                data.UserName = user.UserName;
+                data.Address = user.Address;
+                data.Password = user.Password;
+                data.Email = user.Email;
+                data.RoleId = 1;
+                data.CreatedBy = 0;
+                data.ModifiedBy = 0;
+                data.CreatedDate = DateTime.Now;
+                data.ModifiedDate = DateTime.Now;
+                data.IsActive = true;
+                _userRepository.Add(data);
+                return user;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> SendMail(Users users)
+        {
+            var otp = await _oTPService.GenerateOTP(users.UserId);
+            var sub = "OTP";
+            var body = "";
+            body += "<h3>Job Portal</h3>";
+            body += $"<h4 style='font-size:1.1em'>Hi, {users.UserName}</h4>";
+            body += $"<h4 style='font-size:1.1em'>This is your OTP to reset your password : {otp}.</h4>";
+            var execute = await FireEmail(users.Email, sub, body);
+            if (execute == true)
+                return true;
+            return false;
+        }
+
+
     }
 }
