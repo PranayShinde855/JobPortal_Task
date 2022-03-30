@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers.Jobs
 {
-    [Route("api/Jobs")]
+    [Route("api/[controller]")]
     [EnableCors("AllowOrigin")]
     [ApiController]
     public class JobsController : BaseController
@@ -107,24 +107,24 @@ namespace API.Controllers.Jobs
         [Authorize(Policy = "User")]
         [HttpGet]
         [Route("GetAllJobsAppliedByMe")]
-        public async Task<IActionResult> GetAllJobsAppliedByMe(int userId)
+        public async Task<IActionResult> GetAllJobsAppliedByMe()
         {
             if (ModelState.IsValid)
             {
                 //return Ok(await _appliedJobsService.GetAll());
-                return Ok(await _appliedJobsService.GetAllJobsAppliedByMe(userId)); ;
+                return Ok(await _appliedJobsService.GetAllJobsAppliedByMe(UserId));
             }
             return BadRequest();
         }
 
-        [Authorize(Policy = "Recruiter")]
         [HttpGet]
         [Route("GetAllApplicantAppliedToMyJobs")]
-        public async Task<IActionResult> GetAllApplicantAppliedToMyJobs(int userId)
+        [Authorize(Policy = "Recruiter")]
+        public async Task<IActionResult> GetAllApplicantAppliedToMyJobs()
         {
             if (ModelState.IsValid)
             {   
-                return Ok(await _appliedJobsService.GetAllApplicantAppliedToMyJobs(userId)); ;
+                return Ok(await _appliedJobsService.GetAllApplicantAppliedToMyJobs(UserId));
             }
             return BadRequest();
         }

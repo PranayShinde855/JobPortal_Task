@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers.Roles
 {
-    [Route("api/Roles")]
+    [Route("api/[controller]")]
     [EnableCors("AllowOrigin")]
     [ApiController]
     [Authorize(Policy ="Admin")]

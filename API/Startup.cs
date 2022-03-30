@@ -3,6 +3,7 @@ using Database.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ using Services.Jobs;
 using Services.OTPService;
 using Services.Roles;
 using Services.UserServices;
+using System;
 using System.Text;
 
 namespace API
@@ -47,7 +49,13 @@ namespace API
             services.AddScoped<IOTPRepository, OTPRepository>()
                 .AddScoped<IOTPService, OTPService>();
 
-            services.AddCors();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Recruiter", policy => policy.RequireRole("Admin", "Recruiter"));
+                options.AddPolicy("AllAllowed", policy => policy.RequireRole("Admin", "Recruiter", "User"));
+                options.AddPolicy("User", policy => policy.RequireRole("Admin", "User"));
+                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+            });
 
             services.AddAuthentication(options =>
             {
@@ -64,25 +72,25 @@ namespace API
                {
                    ValidateIssuer = true,
                    ValidateAudience = true,
+                   ValidateLifetime = true,
+                   ClockSkew = TimeSpan.Zero,
                    ValidAudience = Configuration["JWT:ValidAudience"],
                    ValidIssuer = Configuration["JWT:ValidIssuer"],
-                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
+                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Key"]))
                };
            });
 
-            services.AddAuthorization(options =>
+            services.AddControllers();
+
+            services.Configure<ApiBehaviorOptions>(options =>
             {
-                options.AddPolicy("Recruiter", policy => policy.RequireRole("Admin"));
-                options.AddPolicy("AllAllowed", policy => policy.RequireRole("Admin", "Recruiter", "User"));
-                options.AddPolicy("User", policy => policy.RequireRole("Admin", "User"));
-                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+                options.SuppressModelStateInvalidFilter = true;
             });
 
             services.AddControllersWithViews()
             .AddNewtonsoftJson(options =>
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-            services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
@@ -127,9 +135,13 @@ namespace API
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseCors(options => options.AllowAnyOrigin()
+                                          .AllowAnyHeader()
+                                          .AllowAnyMethod());
 
-            app.UseCors();
+            app.UseAuthentication();
+
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

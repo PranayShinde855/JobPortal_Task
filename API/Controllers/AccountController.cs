@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers
 {
-    [Route("api/Account")]
+    [Route("api/[controller]")]
     [EnableCors("AllowOrigin")]
     [ApiController]
     public class AccountController : BaseController
@@ -110,12 +110,12 @@ namespace API.Controllers
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                     };
 
-                    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+                    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
                     var token = new JwtSecurityToken(
-                        issuer:_configuration["JWT:ValidAudeince"],
-                        audience: _configuration["JWT:ValidIssuer"],
+                        issuer:_configuration["JWT:ValidIssuer"],
+                        audience: _configuration["JWT:ValidAudience"],
                         claims:claim,
-                        expires: DateTime.Now.AddMinutes(60),
+                        expires: DateTime.Now.AddMonths(2),
                         signingCredentials: new SigningCredentials( securityKey, SecurityAlgorithms.HmacSha256)
                         );
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers.Users
 {
-    [Route("api/UserController")]
+    [Route("api/[controller]")]
     [EnableCors("AllowOrigin")]
     [ApiController]
     public class ApplicationUserController : BaseController
