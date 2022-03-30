@@ -16,10 +16,11 @@ namespace Database.Infrastructure
             _dbContext = dbContext;
         }
 
-        public void Add(T entity)
+        public async Task<T> Add(T entity)
         {
             _dbContext.Add(entity);
-             _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
+            return entity;
         }
 
         public virtual async Task<T> Update(T entity)
@@ -39,10 +40,11 @@ namespace Database.Infrastructure
             return _dbContext.Set<T>();
         }
 
-        public void Delete(T entity)
+        public async Task<T> Delete(T entity)
         {
             _dbContext.Set<T>().Remove(entity);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
+            return entity;
         }
 
         public async Task<T> GetDefault(Expression<Func<T, bool>> expression)

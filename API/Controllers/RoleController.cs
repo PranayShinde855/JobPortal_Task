@@ -19,51 +19,41 @@ namespace API.Controllers.Roles
         }
 
         [HttpGet]
-        [Route("GetRoles")]
+        [Route("Roles")]
         public async Task<IActionResult> GetRoles()
         {
             return Ok(await _roleService.GetAll());
         }
 
         [HttpGet]
-        [Route("GetRoleById")]
-        public async Task<IActionResult> GetRoleById(int Id)
+        [Route("Roles/{id}")]
+        public async Task<IActionResult> GetRoleById(int id)
         {
-            if (Id != null)
-            {
-                return Ok(await _roleService.GetById(Id));
-            }
-            return BadRequest();
+            return Ok(await _roleService.GetById(id));
         }
 
         [HttpPost]
-        [Route("AddRole")]
+        [Route("Roles")]
         public async Task<IActionResult> AddRole(Models.Roles role)
         {
             if(ModelState.IsValid)
-            return Ok(_roleService.Add(role));
+            return Ok(await _roleService.Add(role));
 
             return BadRequest();
         }
 
         [HttpPut]
-        [Route("UpdateRole")]
-        public async Task<IActionResult> UpdateRole(int Id, Models.Roles role)
+        [Route("Roles/{id}")]
+        public async Task<IActionResult> UpdateRole(int id, Models.Roles role)
         {
-            if(Id != null)
-                return Ok(_roleService.Update(Id, role));
-
-            return BadRequest();
+            return Ok(await _roleService.Update(id, role));
         }
 
         [HttpDelete]
-        [Route("DeleteRole")]
-        public async Task<IActionResult> DeleteRole(int Id)
+        [Route("Roles/{id}")]
+        public async Task<IActionResult> DeleteRole(int id)
         {
-            if (Id != null)
-                return Ok( await _roleService.Delete(Id));
-
-            return BadRequest();
+            return Ok( await _roleService.Delete(id));
         }
     }
 }

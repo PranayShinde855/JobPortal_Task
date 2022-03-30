@@ -26,7 +26,7 @@ namespace Services.Roles
                 obj.CreatedBy = role.CreatedBy;
                 obj.ModifiedBy = role.ModifiedBy;
                 obj.IsActive = true;
-                _roleRepository.Add(obj);
+                await _roleRepository.Add(obj);
                 return role;
             }
             catch(Exception ex)
@@ -40,7 +40,7 @@ namespace Services.Roles
             var obj = await _roleRepository.GetById(Id);
             if (obj != null)
             {
-                _roleRepository.Delete(obj);
+                await _roleRepository.Delete(obj);
                 return true;
             }
             return false;
@@ -60,7 +60,7 @@ namespace Services.Roles
         public async Task<Models.Roles> Update(int Id, Models.Roles role)
         {
             var obj = await _roleRepository.GetById(Id);
-            if(Id !=null)
+            if(obj !=null)
             {
                 obj.Name = role.Name;
                 obj.ModifiedDate = DateTime.Now;

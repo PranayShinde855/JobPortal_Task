@@ -10,11 +10,6 @@ namespace Database
 
         }
 
-        public DbContextModel()
-        {
-
-        }
-
         public DbSet<Users> Users { get; set; }
         public DbSet<Roles> Roles { get; set; }
         public DbSet<Job> Jobs { get; set; }

@@ -1,12 +1,18 @@
 ﻿using Database.Repository;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Models;
 using Models.DTOs;
 using Services.OTPService;
+using Services.Roles;
 using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.UserServices
@@ -15,13 +21,14 @@ namespace Services.UserServices
     {
         protected readonly IUserRepository _userRepository;
         protected readonly IConfiguration _configuration;
-        protected readonly IOTPRepository _oTPRepository;
         protected readonly IOTPService _oTPService;
-        public UserService(IUserRepository userRepositor, IConfiguration configuration, IOTPRepository oTPRepository)
+        protected readonly IRoleService _roleService; 
+        public UserService(IUserRepository userRepositor, IConfiguration configuration, 
+             IRoleService roleService)
         {
             _userRepository = userRepositor;
             _configuration = configuration;
-            _oTPRepository = oTPRepository;
+            _roleService = roleService;
         }
 
         public async Task<Users> AddUser(Users user)
@@ -39,7 +46,7 @@ namespace Services.UserServices
                 data.CreatedDate = DateTime.Now;
                 data.ModifiedDate = DateTime.Now;
                 data.IsActive = true;
-                 _userRepository.Add(data);
+                await _userRepository.Add(data);
                 return user;
             }
             catch (Exception ex)
@@ -62,7 +69,7 @@ namespace Services.UserServices
                 data.CreatedDate = DateTime.Now;
                 data.ModifiedDate = DateTime.Now;
                 data.IsActive = true;
-                _userRepository.Add(data);
+                await _userRepository.Add(data);
                 return user;
             }
             catch (Exception ex)
@@ -71,12 +78,12 @@ namespace Services.UserServices
             }
         }
 
-        public async Task<bool> Delete(int Id)
+        public async Task<bool> Delete(int id)
         {
-            var getdata = await _userRepository.GetById(Id);
+            var getdata = await _userRepository.GetById(id);
             if(getdata != null)
             {
-                _userRepository.Delete(getdata);
+                await _userRepository.Delete(getdata);
                 return true;
             }
             return false;
@@ -87,11 +94,11 @@ namespace Services.UserServices
              return await _userRepository.GetAll();
         }
 
-        public async Task<Users> GetById(int Id)
+        public async Task<Users> GetById(int id)
         {
             try
             {
-                var info = await _userRepository.GetById(Id);
+                var info = await _userRepository.GetById(id);
                 return info;
             }
             catch (Exception ex)
@@ -100,18 +107,18 @@ namespace Services.UserServices
             }
         }
 
-        public async Task<Users> Update(int Id, Users user)
+        public async Task<Users> Update(int id, Users user)
         {
             try
             {
-                Users getdata = await _userRepository.GetById(Id);
+                Users getdata = await _userRepository.GetById(id);
                 if (getdata != null)
                 {
                     getdata.UserName = user.UserName;
                     getdata.Address = user.Address;
                     getdata.Password = user.Password;
                     getdata.Email = user.Email;
-                    getdata.ModifiedBy = Id;
+                    getdata.ModifiedBy = id;
                     getdata.ModifiedDate = DateTime.Now;
                     await _userRepository.Update(getdata);
                     return user;
@@ -129,7 +136,7 @@ namespace Services.UserServices
             return await _userRepository.GetDefault(x => x.Email == email && x.Password == password);
         }
 
-        public async Task<bool> FireEmail(string to, string subject, string message)
+        public async Task<bool> ExecuteEmail(string to, string subject, string message)
         {
             try
             {
@@ -150,12 +157,12 @@ namespace Services.UserServices
                     await smtp.SendMailAsync(mail);
                     return true;
                 }
+                return false;
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            return false;
         }
 
         public async Task<Users> GetUser(string email)
@@ -199,7 +206,7 @@ namespace Services.UserServices
                 data.CreatedDate = DateTime.Now;
                 data.ModifiedDate = DateTime.Now;
                 data.IsActive = true;
-                _userRepository.Add(data);
+                await _userRepository.Add(data);
                 return user;
             }
             catch (Exception ex)
@@ -216,12 +223,36 @@ namespace Services.UserServices
             body += "<h3>Job Portal</h3>";
             body += $"<h4 style='font-size:1.1em'>Hi, {users.UserName}</h4>";
             body += $"<h4 style='font-size:1.1em'>This is your OTP to reset your password : {otp}.</h4>";
-            var execute = await FireEmail(users.Email, sub, body);
+            var execute = await ExecuteEmail(users.Email, sub, body);
             if (execute == true)
                 return true;
             return false;
         }
 
+        public async Task<TokenDetailsTO> GenerateToken(GenerateTokenRequestDTO req)
+        {
+            var claim = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, req.UserName),
+                        new Claim("UserId", Convert.ToString(req.UserId), ClaimValueTypes.Integer),
+                        new Claim("Email", req.Email, ClaimValueTypes.String),
+                        new Claim("RoleId", Convert.ToString(req.RoleId), ClaimValueTypes.Integer),
+                        new Claim(ClaimTypes.Role, req.Role, ClaimValueTypes.String),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                    };
 
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
+                claims: claim,
+                expires: DateTime.Now.AddMonths(2),
+                signingCredentials: new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256));
+
+            TokenDetailsTO obj = new TokenDetailsTO();
+            obj.Token = new JwtSecurityTokenHandler().WriteToken(token);
+            obj.Expiration = token.ValidTo;
+            return obj;
+        }
     }
 }

@@ -35,7 +35,7 @@ namespace Services.OTPService
             OTP oTP = new OTP();
             oTP.Otp = otp;
             oTP.UserId = userId;
-            _oTPRepository.Add(oTP);
+            await _oTPRepository.Add(oTP);
             return otp;
         }
 

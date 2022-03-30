@@ -8,11 +8,11 @@ namespace Database.Infrastructure
     public interface IRepository<T> where T : class
     {
 
-        void Add(T entity);
+        Task<T> Add(T entity);
         Task<T> Update(T entity);
         Task<T> GetById(int Id);
         Task<IQueryable<T>> GetAll();
-        void Delete(T entity);
+        Task<T> Delete(T entity);
         Task<T> GetDefault(Expression<Func<T, bool>> expression);
     }
 }

@@ -15,33 +15,27 @@ namespace API.Controllers.Jobs
     public class JobsController : BaseController
     {
         private readonly IJobService _jobService;
-        private readonly IUserService _userService;
         private readonly IAppliedJobsService _appliedJobsService;
         public JobsController(IJobService jobService, IAppliedJobsService appliedJobsService, IUserService userService)
         {
             _jobService = jobService;
             _appliedJobsService = appliedJobsService;
-            _userService = userService;
         }
 
         [HttpGet]
         [Authorize(Policy ="AllAllowed")]
-        [Route("GetAllJobs")]
+        [Route("Jobs")]
         public async Task<IActionResult> GetAllJobs()
         {
-            var info = await _jobService.GetAll();
-            if (info == null)
-                return NotFound();
-
-            return Ok(info);
+            return Ok(await _jobService.GetAll());
         }
 
         [HttpGet]
         [Authorize(Policy ="AllAllowed")]
-        [Route("GetById")]
-        public async Task<IActionResult> GetJobById(int Id)
+        [Route("Jobs/{id}")]
+        public async Task<IActionResult> GetJobById(int id)
         {
-            Job info = await _jobService.GetById(Id);
+            Job info = await _jobService.GetById(id);
             if (info == null)
                 return NotFound();
 
@@ -50,7 +44,7 @@ namespace API.Controllers.Jobs
 
         [HttpPost]
         [Authorize(Policy ="User")]
-        [Route("AddJob")]
+        [Route("Job")]
         public async Task<IActionResult> AddJob(Job job)
         {
             var info = await _jobService.Add(job);
@@ -62,7 +56,7 @@ namespace API.Controllers.Jobs
 
         [HttpPut]
         [Authorize(Policy ="Recruiter")]
-        [Route("UpdateJob")]
+        [Route("Jobs/{id}")]
         public async Task<IActionResult> UpdateJobById(Job job)
         {
             var info = await _jobService.Update(job);
@@ -74,7 +68,7 @@ namespace API.Controllers.Jobs
 
         [HttpDelete]
         [Authorize(Policy ="Recruiter")]
-        [Route("DeleteJob")]
+        [Route("Jobs/{id}")]
         public async Task<IActionResult> DeleteJob(int id)
         {
             var info = await _jobService.Delete(id);
@@ -86,79 +80,71 @@ namespace API.Controllers.Jobs
 
         [HttpPost]
         [Authorize(Policy ="User")]
-        [Route("ApplyJob")]
+        [Route("Jobs/Apply")]
         public async Task<IActionResult> ApplyJob(AppliedJob appliedJob)
         {
             if(ModelState.IsValid)
             {
-                try
+                var chek = await _appliedJobsService.AlreadyAppliedToJob(appliedJob.JobId, appliedJob.AppliedBy);
+                if(chek == false)
                 {
-                    var appliedJobStatus = await _appliedJobsService.Add(appliedJob);
-                    return Ok(appliedJob);
+                    try
+                    {
+                        var appliedJobStatus = await _appliedJobsService.Add(appliedJob);
+                        return Ok(appliedJob);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
                 }
-                catch(Exception ex)
-                {
-                    throw ex;
-                }
+                return BadRequest("Al");
+            }
+            return BadRequest();
+        }
+
+        [HttpGet]
+        [Route("AppliedJobs/Recruiter")]
+        [Authorize(Policy = "Recruiter")]
+        public async Task<IActionResult> GetAllApplicantAppliedToMyJobs()
+        {
+            if (ModelState.IsValid)
+            {
+                return Ok(await _appliedJobsService.GetAllApplicantAppliedToMyJobs(UserId));
             }
             return BadRequest();
         }
 
         [Authorize(Policy = "User")]
         [HttpGet]
-        [Route("GetAllJobsAppliedByMe")]
+        [Route("AppliedJobs/Applicant")]
         public async Task<IActionResult> GetAllJobsAppliedByMe()
         {
-            if (ModelState.IsValid)
-            {
-                //return Ok(await _appliedJobsService.GetAll());
-                return Ok(await _appliedJobsService.GetAllJobsAppliedByMe(UserId));
-            }
-            return BadRequest();
-        }
-
-        [HttpGet]
-        [Route("GetAllApplicantAppliedToMyJobs")]
-        [Authorize(Policy = "Recruiter")]
-        public async Task<IActionResult> GetAllApplicantAppliedToMyJobs()
-        {
-            if (ModelState.IsValid)
-            {   
-                return Ok(await _appliedJobsService.GetAllApplicantAppliedToMyJobs(UserId));
-            }
-            return BadRequest();
-        }
-
-        [HttpGet]
-        [Authorize(Policy ="User")]
-        [Route("GetAllAppliedJobs")]
-        public async Task<IActionResult> GetAllAppliedJobs()
-        {
-            return Ok(await _appliedJobsService.GetAll());
+            return Ok(await _appliedJobsService.GetAllJobsAppliedByMe(UserId));
         }
 
         [HttpPut]
         [Authorize(Policy ="User")]
-        [Route("UpdateAppliedJob")]
-        public async Task<IActionResult> UpdateAppliedJob(AppliedJob appliedJob)
+        [Route("AppliedJobs/Applicant/{id}")]
+        public async Task<IActionResult> UpdateAppliedJob(int id, AppliedJob appliedJob)
         {
             if (ModelState.IsValid)
             {
-                return Ok(await _appliedJobsService.Update(appliedJob));
+                return Ok(await _appliedJobsService.Update(id, appliedJob));
             }
             return BadRequest();
         }
 
         [HttpDelete]
         [Authorize(Policy ="User")]
-        [Route("DeleteAppliedJob")]
+        [Route("AppliedJobs/Applicant/{id}")]
         public async Task<IActionResult> DeleteAppliedJob(int id)
         {
-            if (id == null)
-            {
-                return Ok(await _appliedJobsService.Delete(id));
-            }
-            return NotFound();
+            var result = await _appliedJobsService.Delete(id);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
         }
     }
 }

@@ -2,16 +2,10 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using Models.DTOs;
 using Services.OTPService;
 using Services.Roles;
 using Services.UserServices;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace API.Controllers
@@ -27,7 +21,8 @@ namespace API.Controllers
         protected readonly IOTPService _oTPService;
 
         
-        public AccountController(IUserService userSerivce, IRoleService roleService, IConfiguration configuration, IOTPService oTPService)
+        public AccountController(IUserService userSerivce, IRoleService roleService, 
+            IConfiguration configuration, IOTPService oTPService)
         {
             _userSerivce = userSerivce;
             _roleSerivce = roleService;
@@ -37,8 +32,8 @@ namespace API.Controllers
 
         [HttpPost]
         [Authorize(Policy ="Admin")]
-        [Route("AdminRegistration")]
-        public async Task<IActionResult> AddAdmin(Models.Users user)
+        [Route("Registration/Admin")]
+        public async Task<IActionResult> AddRegistration(Models.Users user)
         {
             if (ModelState.IsValid)
             {
@@ -56,24 +51,24 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("UserRegistration")]
+        [Route("Registration/User")]
         public async Task<IActionResult> UserRegistration(Models.Users user)
         {
             if (ModelState.IsValid)
             {
-                bool checckEmail = await _userSerivce.CheckEmailIdExist(user.Email);
-                if (checckEmail == false)
+                bool checkEmail = await _userSerivce.CheckEmailIdExist(user.Email);
+                if (checkEmail == false)
                 {
                     await _userSerivce.AddUser(user);
                     return Ok();
                 }
-                return BadRequest("This email address is already taken. Please use another eamil address.");
+                return BadRequest(ModelState);
             }
-            return BadRequest("Model does not contains the attributes which are required.");
+            return BadRequest(ModelState);
         }
 
         [HttpPost]
-        [Route("RecruiterRegistration")]
+        [Route("Registration/Recruiter")]
         public async Task<IActionResult> AddRecruiter(Models.Users user)
         {
             if (ModelState.IsValid)
@@ -97,43 +92,26 @@ namespace API.Controllers
             if (email != null && password != null)
             {
                 var userDetails = await _userSerivce.GetUser(email, password);
-                if(userDetails != null)
+                if(userDetails !=  null)
                 {
-                    var role = await _roleSerivce.GetById(userDetails.RoleId);
-                    var claim = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, userDetails.UserName),
-                        new Claim("UserId", Convert.ToString(userDetails.UserId), ClaimValueTypes.Integer),
-                        new Claim("Email", userDetails.Email, ClaimValueTypes.String),
-                        new Claim("RoleId", Convert.ToString(userDetails.RoleId), ClaimValueTypes.Integer),
-                        new Claim(ClaimTypes.Role, role.Name, ClaimValueTypes.String),
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                    };
-
-                    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
-                    var token = new JwtSecurityToken(
-                        issuer:_configuration["JWT:ValidIssuer"],
-                        audience: _configuration["JWT:ValidAudience"],
-                        claims:claim,
-                        expires: DateTime.Now.AddMonths(2),
-                        signingCredentials: new SigningCredentials( securityKey, SecurityAlgorithms.HmacSha256)
-                        );
-
-                    return Ok(new
-                    {
-                        token = new JwtSecurityTokenHandler().WriteToken(token),
-                        expiration = token.ValidTo
-                    });
+                    var userRole = await _roleSerivce.GetById(userDetails.RoleId);
+                    GenerateTokenRequestDTO obj = new GenerateTokenRequestDTO();
+                    obj.UserId = userDetails.UserId;
+                    obj.UserName = userDetails.UserName;
+                    obj.Password = userDetails.Password;
+                    obj.Email = userDetails.Email;
+                    obj.RoleId = userDetails.RoleId;
+                    obj.Role = userRole.Name;
+                    return Ok(await _userSerivce.GenerateToken(obj));
                 }
-                return Unauthorized();
+                return BadRequest("UserName or Password is invalid.");
             }
-
-            return Unauthorized();
+            return BadRequest("Please enter UserName and Password.");
         }
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("ForgeotPassword")]
+        [Route("ForgotPassword")]
         public async Task<IActionResult> ForgotPassword(string email)
         {
             var data = await _userSerivce.GetUser(email);

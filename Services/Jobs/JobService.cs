@@ -26,14 +26,14 @@ namespace Services.Jobs
             obj.CreatedDate = DateTime.Now;
             obj.ModifiedDate = DateTime.Now;
             obj.IsActive = true;
-            _jobsRepository.Add(obj);
+            await _jobsRepository.Add(obj);
             return obj;
         }
 
         public async Task<Job> Delete(int id)
         {
             var getUser = await _jobsRepository.GetById(id);
-            _jobsRepository.Delete(getUser);
+            await _jobsRepository.Delete(getUser);
             return getUser;
         }
 

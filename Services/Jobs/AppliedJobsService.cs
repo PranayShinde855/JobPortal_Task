@@ -34,7 +34,7 @@ namespace Services.Jobs
             obj.AppliedBy = appliedJob.AppliedBy;
             obj.AppliedDate = DateTime.Now;
             obj.IsActive = true;
-            _appliedJobsRepository.Add(obj);
+            await _appliedJobsRepository.Add(obj);
 
             var getUserDetails = await _userService.GetById(appliedJob.AppliedBy);
             var getJobDetails = await _jobService.GetById(appliedJob.JobId);
@@ -47,7 +47,7 @@ namespace Services.Jobs
         public async Task<AppliedJob> Delete(int id)
         {
             AppliedJob getJob = await _appliedJobsRepository.GetById(id);
-            _appliedJobsRepository.Delete(getJob);
+            await _appliedJobsRepository.Delete(getJob);
             return getJob;
         }
 
@@ -80,7 +80,7 @@ namespace Services.Jobs
             body += $"<h4 style='font-size:1.1em'>Description : {jobs.Description} </h4>";
             body += $"<h4 style='font-size:1.1em'>Skills : {jobs.Skills} </h4>";
             body += $"<h4 style='font-size:1.1em'>Location : {jobs.Location} </h4>";
-            var execute = await FireEmail(users.Email, sub, body);
+            var execute = await _userService.ExecuteEmail(users.Email, sub, body);
             if (execute == true)
                 return true;
             return false;
@@ -93,19 +93,19 @@ namespace Services.Jobs
             body += $"<h4 style='font-size:1.1em'>Name : {users.UserName} </h4>";
             body += $"<h4 style='font-size:1.1em'>Address : {users.Address} </h4>";
             body += $"<h4 style='font-size:1.1em'>Email : {users.Email} </h4>";
-             body += "<h4 style='font-size:1.1em'>Job Details </h4>";
+            body += "<h4 style='font-size:1.1em'>Job Details </h4>";
             body += $"<h4 style='font-size:1.1em'>Title : {jobs.Title} </h4>";
             body += $"<h4 style='font-size:1.1em'>Description : {jobs.Description} </h4>";
             body += $"<h4 style='font-size:1.1em'>Skills : {jobs.Skills} </h4>";
             body += $"<h4 style='font-size:1.1em'>Location : {jobs.Location} </h4>";
-            var execute = await FireEmail(users.Email, sub, body);
+            var execute = await _userService.ExecuteEmail(users.Email, sub, body);
             if (execute == true)
                 return true;
             return false;
         }
-        public async Task<AppliedJob> Update(AppliedJob appliedJob)
+        public async Task<AppliedJob> Update(int id, AppliedJob appliedJob)
         {
-            AppliedJob getAppliedJob = await _appliedJobsRepository.GetById(appliedJob.Id); 
+            AppliedJob getAppliedJob = await _appliedJobsRepository.GetById(id); 
             if(getAppliedJob != null)
             {
                 getAppliedJob.JobId = appliedJob.JobId;
@@ -116,32 +116,12 @@ namespace Services.Jobs
             return appliedJob;
         }
 
-        public async Task<bool> FireEmail(string to, string subject, string message)
+        public async Task<bool> AlreadyAppliedToJob(int jobId, int userId)
         {
-            try
-            {
-                MailMessage mail = new MailMessage()
-                {
-                    From = new MailAddress(_configuration["EMailSettings:Mail"], _configuration["EMailSettings:DisplayName"])
-                };
-                to.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(t => mail.To.Add(new MailAddress(t)));
-                mail.Subject = subject;
-                mail.Body = message;
-                mail.IsBodyHtml = true;
-                mail.Priority = MailPriority.High;
+            var check = await _appliedJobsRepository.GetDefault(x => x.JobId == jobId && x.AppliedBy == userId);
+            if (check != null)
+                return true;
 
-                using (SmtpClient smtp = new SmtpClient(_configuration["EMailSettings:Host"], Convert.ToInt32(_configuration["EMailSettings:Port"])))
-                {
-                    smtp.Credentials = new NetworkCredential(_configuration["EMailSettings:Mail"], _configuration["EMailSettings:Password"]);
-                    smtp.EnableSsl = true;
-                    await smtp.SendMailAsync(mail);
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
             return false;
         }
     }

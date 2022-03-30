@@ -13,12 +13,12 @@ namespace Services.Jobs
         Task<AppliedJob> Add(AppliedJob appliedJob);
         Task<bool> SendMailToUser(Users users, Job jobs);
         Task<bool> SendMailToRecruiter(Users users, Job jobs);
-        Task<AppliedJob> Update(AppliedJob appliedJob);
+        Task<AppliedJob> Update(int id, AppliedJob appliedJob);
         Task<AppliedJob> Delete(int id);
         Task<AppliedJob> GetById(int id);
         Task<IQueryable<AppliedJob>> GetAll();
         Task<IEnumerable<AppliedJobDTO>> GetAllApplicantAppliedToMyJobs(int userId);
         Task<IEnumerable<AppliedJobDTO>> GetAllJobsAppliedByMe(int userId);
-        Task<bool> FireEmail(string to, string subject, string message);
+        Task<bool> AlreadyAppliedToJob(int jobId, int userId);
     }
 }

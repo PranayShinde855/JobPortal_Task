@@ -19,7 +19,7 @@ namespace API.Controllers.Users
 
         [HttpGet]
         [Authorize(Policy ="Admin")]
-        [Route("UserList")]
+        [Route("Users")]
         public async Task<IActionResult> Get()
         {
             return Ok(await _userSerivce.GetAll());
@@ -27,39 +27,39 @@ namespace API.Controllers.Users
 
         [HttpGet]
         [Authorize(Policy ="Admin")]
-        [Route("GetUserById")]
-        public async Task<IActionResult> GetById(int Id)
+        [Route("Users/{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            if (Id != null)
-            {
-                return Ok(await _userSerivce.GetById(Id));
-            }
-            return NotFound("UserId not found.");
+            var result = await _userSerivce.GetById(id);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
         }
 
 
         [HttpPut]
         [Authorize(Policy ="AllAllowed")]
-        [Route("UpdateUser")]
-        public async Task<IActionResult> Update(int Id, Models.Users user)
+        [Route("Users/{id}")]
+        public async Task<IActionResult> Update(int id, Models.Users user)
         {
-            if (Id != null)
-            {
-                return Ok(await _userSerivce.Update(Id, user));
-            }
-            return NotFound();
+            var result = await _userSerivce.Update(id, user);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
         }
 
         [HttpDelete]
         [Authorize(Policy ="Admin")]
-        [Route("DeleteUser")]
-        public async Task<IActionResult> Delete(int Id)
+        [Route("Users/{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            if (Id != null)
-            {
-                return Ok(await _userSerivce.Delete(Id));
-            }
-            return NotFound("UserId not found.");
+            var result = await _userSerivce.Delete(id);
+            if (result == false)
+                return NotFound();
+
+            return Ok(result);
         }
     }
 }

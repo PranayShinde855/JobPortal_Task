@@ -16,9 +16,10 @@ namespace Services.UserServices
         Task<IQueryable<Users>> GetAll();
         Task<Users> GetUser(string email, string password);
         Task<Users> GetUser(string emil);
-        Task<bool> FireEmail(string to, string subject, string message);
+        Task<bool> ExecuteEmail(string to, string subject, string message);
         Task<bool> ResetPassword(ResetPasswordDTO dTO, int Id);
         Task<bool> CheckEmailIdExist(string Email);
         Task<bool> SendMail(Users users);
+        Task<TokenDetailsTO> GenerateToken(GenerateTokenRequestDTO obj);
     }
 }
