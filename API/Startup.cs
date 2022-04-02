@@ -1,4 +1,9 @@
+using ADOServices.ADOServices.Jobs;
+using ADOServices.ADOServices.OTPServices;
+using ADOServices.ADOServices.RoleServices;
+using ADOServices.ADOServices.UserServices;
 using Database;
+using Database.ADO;
 using Database.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Services.ADOServices.Jobs;
+using Services.ADOServices.RoleServices;
 using Services.Jobs;
 using Services.OTPService;
 using Services.Roles;
@@ -31,23 +38,35 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
             services.AddDbContext<DbContextModel>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("Connection")));
 
-            services.AddScoped<IUserRepository, UserRepository>()
-                .AddScoped<IUserService, UserService>();
+            services
+                //.AddScoped<IDB, DB>()
 
-            services.AddScoped<IRoleRepository, RoleRepository>()
-                .AddScoped<IRoleService, RoleService>();
+                .AddScoped<IUserRepository, UserRepository>()
+                .AddScoped<IUserService, UserService>()
 
-            services.AddScoped<IAppliedJobsRepository, AppliedJobRepository>()
-                .AddScoped<IAppliedJobsService, AppliedJobsService>();
+                .AddScoped<IRoleRepository, RoleRepository>()
+                .AddScoped<IRoleService, RoleService>()
 
-            services.AddScoped<IJobsRepository, JobsRepository>()
-                .AddScoped<IJobService, JobService>();
+                .AddScoped<IAppliedJobsRepository, AppliedJobRepository>()
+                .AddScoped<IAppliedJobsService, AppliedJobsService>()
 
-            services.AddScoped<IOTPRepository, OTPRepository>()
-                .AddScoped<IOTPService, OTPService>();
+                .AddScoped<IJobsRepository, JobsRepository>()
+                .AddScoped<IJobService, JobService>()
+
+                .AddScoped<IOTPRepository, OTPRepository>()
+                .AddScoped<IOTPService, OTPService>()
+
+
+                .AddScoped<IAppliedJobsServices, AppliedJobsServices>()
+                .AddScoped<IJobsServices, JobsServices>()
+                .AddScoped<IOTPServices, OTPServices>()
+                .AddScoped<IRoleServices, RolesServices>()
+                .AddScoped<IUserServices, UserServices>();
 
             services.AddAuthorization(options =>
             {
@@ -142,6 +161,8 @@ namespace API
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            app.UseMiddleware<ErrorHandlerMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

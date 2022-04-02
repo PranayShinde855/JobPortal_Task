@@ -46,7 +46,7 @@ namespace API.Controllers
 
                 return BadRequest("This email address is already taken. Please use another eamil address.");
             }
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         [AllowAnonymous]
@@ -81,7 +81,7 @@ namespace API.Controllers
                 }
                 return BadRequest("This email address is already taken. Please use another eamil address.");
             }
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         [AllowAnonymous]
