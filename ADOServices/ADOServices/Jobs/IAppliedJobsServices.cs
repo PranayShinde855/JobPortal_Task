@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Models;
+﻿using Models;
 using Models.DTOs;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ADOServices.ADOServices.Jobs
@@ -12,6 +8,7 @@ namespace ADOServices.ADOServices.Jobs
     public interface IAppliedJobsServices
     {
         Task<bool> Add(int jobId, int userId);
+        Task<EmailRequestDTO> EmailDetails(int jobId, int applicantId);
         Task<bool> SendMailToUser(EmailRequestDTO req);
         Task<bool> SendMailToRecruiter(EmailRequestDTO req);
         Task<bool> Delete(int id);

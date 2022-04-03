@@ -1,6 +1,5 @@
 ﻿using ADOServices.ADOServices.OTPServices;
 using Database.ADO;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

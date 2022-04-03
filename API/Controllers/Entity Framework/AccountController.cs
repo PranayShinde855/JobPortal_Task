@@ -33,14 +33,14 @@ namespace API.Controllers
         [HttpPost]
         [Authorize(Policy ="Admin")]
         [Route("Registration/Admin")]
-        public async Task<IActionResult> AddRegistration(Models.Users user)
+        public async Task<IActionResult> AddRegistration(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)
             {
-                bool checckEmail = await _userSerivce.CheckEmailIdExist(user.Email);
+                bool checckEmail = await _userSerivce.CheckEmailIdExist(req.Email);
                 if (checckEmail == false)
                 {
-                    await _userSerivce.AddAdmin(user);
+                    await _userSerivce.AddAdmin(req);
                     return Ok();
                 }
 
@@ -52,14 +52,14 @@ namespace API.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("Registration/User")]
-        public async Task<IActionResult> UserRegistration(Models.Users user)
+        public async Task<IActionResult> UserRegistration(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)
             {
-                bool checkEmail = await _userSerivce.CheckEmailIdExist(user.Email);
+                bool checkEmail = await _userSerivce.CheckEmailIdExist(req.Email);
                 if (checkEmail == false)
                 {
-                    await _userSerivce.AddUser(user);
+                    await _userSerivce.AddUser(req);
                     return Ok();
                 }
                 return BadRequest(ModelState);
@@ -69,14 +69,14 @@ namespace API.Controllers
 
         [HttpPost]
         [Route("Registration/Recruiter")]
-        public async Task<IActionResult> AddRecruiter(Models.Users user)
+        public async Task<IActionResult> AddRecruiter(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)
             {
-                bool checckEmail = await _userSerivce.CheckEmailIdExist(user.Email);
+                bool checckEmail = await _userSerivce.CheckEmailIdExist(req.Email);
                 if (checckEmail == false)
                 {
-                    await _userSerivce.AddRecruiter(user);
+                    await _userSerivce.AddRecruiter(req);
                     return Ok();
                 }
                 return BadRequest("This email address is already taken. Please use another eamil address.");

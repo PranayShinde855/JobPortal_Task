@@ -31,46 +31,46 @@ namespace Services.UserServices
             _roleService = roleService;
         }
 
-        public async Task<Users> AddUser(Users user)
+        public async Task<Users> AddUser(UserRegistrationDTO req)
         {
             try
             {
                 Users data = new Users();
-                data.UserName = user.UserName;
-                data.Address = user.Address;
-                data.Password = user.Password;
-                data.Email = user.Email;
+                data.UserName = req.UserName;
+                data.Address = req.Address;
+                data.Password = req.Password;
+                data.Email = req.Email;
                 data.RoleId = 3;
                 data.CreatedBy = 0;
                 data.ModifiedBy = 0;
                 data.CreatedDate = DateTime.Now;
                 data.ModifiedDate = DateTime.Now;
                 data.IsActive = true;
-                await _userRepository.Add(data);
-                return user;
+                var info = await _userRepository.Add(data);
+                return info;
             }
             catch (Exception ex)
             {
                 throw ex;
             }
         }
-        public async Task<Users> AddRecruiter(Users user)
+        public async Task<Users> AddRecruiter(UserRegistrationDTO req)
         {
             try
             {
                 Users data = new Users();
-                data.UserName = user.UserName;
-                data.Address = user.Address;
-                data.Password = user.Password;
-                data.Email = user.Email;
+                data.UserName = req.UserName;
+                data.Address = req.Address;
+                data.Password = req.Password;
+                data.Email = req.Email;
                 data.RoleId = 2;
                 data.CreatedBy = 0;
                 data.ModifiedBy = 0;
                 data.CreatedDate = DateTime.Now;
                 data.ModifiedDate = DateTime.Now;
                 data.IsActive = true;
-                await _userRepository.Add(data);
-                return user;
+                var info = await _userRepository.Add(data);
+                return info;
             }
             catch (Exception ex)
             {
@@ -107,28 +107,28 @@ namespace Services.UserServices
             }
         }
 
-        public async Task<Users> Update(int id, Users user)
+        public async Task<Users> Update(int id, UserRegistrationDTO req)
         {
+            var info = new Users();
             try
             {
                 Users getdata = await _userRepository.GetById(id);
                 if (getdata != null)
                 {
-                    getdata.UserName = user.UserName;
-                    getdata.Address = user.Address;
-                    getdata.Password = user.Password;
-                    getdata.Email = user.Email;
+                    getdata.UserName = req.UserName;
+                    getdata.Address = req.Address;
+                    getdata.Password = req.Password;
+                    getdata.Email = req.Email;
                     getdata.ModifiedBy = id;
                     getdata.ModifiedDate = DateTime.Now;
-                    await _userRepository.Update(getdata);
-                    return user;
+                    info = await _userRepository.Update(getdata);
                 }
+                return info;
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            return user;
         }
 
         public async Task<Users> GetUser(string email, string password)
@@ -191,23 +191,24 @@ namespace Services.UserServices
             return false;
         }
 
-        public async Task<Users> AddAdmin(Users user)
+        public async Task<Users> AddAdmin(UserRegistrationDTO req)
         {
+            var info = new Users();
             try
             {
                 Users data = new Users();
-                data.UserName = user.UserName;
-                data.Address = user.Address;
-                data.Password = user.Password;
-                data.Email = user.Email;
+                data.UserName = req.UserName;
+                data.Address = req.Address;
+                data.Password = req.Password;
+                data.Email = req.Email;
                 data.RoleId = 1;
                 data.CreatedBy = 0;
                 data.ModifiedBy = 0;
                 data.CreatedDate = DateTime.Now;
                 data.ModifiedDate = DateTime.Now;
                 data.IsActive = true;
-                await _userRepository.Add(data);
-                return user;
+                info = await _userRepository.Add(data);
+                return info;
             }
             catch (Exception ex)
             {

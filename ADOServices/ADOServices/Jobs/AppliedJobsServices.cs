@@ -1,13 +1,8 @@
 ﻿using ADOServices.ADOServices.UserServices;
 using Database.ADO;
-using Microsoft.AspNetCore.Mvc;
 using Models;
 using Models.DTOs;
-using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ADOServices.ADOServices.Jobs
@@ -25,8 +20,13 @@ namespace ADOServices.ADOServices.Jobs
             string query = $"INSERT INTO AppliedJobs VALUES ({jobId}, {userId})";
             var data = await DB<AppliedJob>.ExecuteData(query);
             if (data > 0)
+            {
+                var email = await EmailDetails(jobId, userId);
+                if (email != null)
+                    await SendMailToUser(email);
+                    await SendMailToRecruiter(email);
                 return true;
-
+            }
             return false;
         }
 
@@ -46,6 +46,17 @@ namespace ADOServices.ADOServices.Jobs
             if (info > 0)
                 return true;
             return false;
+        }
+
+        public async Task<EmailRequestDTO> EmailDetails(int jobId, int applicantId)
+        {
+            string query = "SELECT ur.UserName AS Recruiter, ur.Email AS RecruiterEmail, ua.UserName AS Applicant," +
+                            " ua.Email AS ApplicantEmail, ua.Address AS Address, j.Title AS Title, j.Description AS Description," +
+                            " j.skills AS Skills, j.Location AS Location FROM AppliedJobs aj LEFT JOIN Users ua ON aj.AppliedBy = ua.UserId" +
+                            " LEFT JOIN Jobs j ON aj.JobId = j.Id LEFT JOIN Users ur ON j.CreatedBy = ur.UserId " +
+                            "WHERE aj.AppliedBy = '"+ applicantId +"' AND j.Id = '"+ jobId +"'";
+            EmailRequestDTO obj = await DB<EmailRequestDTO>.GetSingleRecord(query);
+            return obj;
         }
 
         public async Task<IEnumerable<AppliedJobDTO>> GetAll()
@@ -93,35 +104,35 @@ namespace ADOServices.ADOServices.Jobs
             return obj;
         }
 
-        public async Task<bool> SendMailToRecruiter(EmailRequestDTO req)
+        public async Task<bool> SendMailToUser(EmailRequestDTO req)
         {
-            var sub = $"{req.UserName} you have successfully applied to job.";
+            var sub = $"Sir/Mam {req.Applicant},\n You have successfully applied to job.";
             var body = "";
-            body += "<h4 style='font-size:1.1em'>Job Details </h4>";
-            body += $"<h4 style='font-size:1.1em'>Title : {req.Title} </h4>";
-            body += $"<h4 style='font-size:1.1em'>Description : {req.Description} </h4>";
-            body += $"<h4 style='font-size:1.1em'>Skills : {req.Skills} </h4>";
-            body += $"<h4 style='font-size:1.1em'>Location : {req.Location} </h4>";
-            var execute = await  _userServices.ExecuteEmail(req.Email, sub, body);
+            body += "<h4 style='font-size:1.1em'>\nJob Details </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nTitle : {req.Title} </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nDescription : {req.Description} </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nSkills : {req.Skills} </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nLocation : {req.Location} </h4>";
+            var execute = await  _userServices.ExecuteEmail(req.ApplicantEmail, sub, body);
             if (execute == true)
                 return true;
             return false;
         }
 
-        public async Task<bool> SendMailToUser(EmailRequestDTO req)
+        public async Task<bool> SendMailToRecruiter(EmailRequestDTO req)
         {
-            var sub = $"{req.UserName} have successfully applied to job you poasted.";
+            var sub = $"Sir/Mam {req.Recruiter},\n {req.Applicant} have successfully applied to job you poasted.";
             var body = "";
-            body += "<h4 style='font-size:1.1em'>Applicant Details </h4>";
-            body += $"<h4 style='font-size:1.1em'>Name : {req.UserName} </h4>";
-            body += $"<h4 style='font-size:1.1em'>Address : {req.Address} </h4>";
-            body += $"<h4 style='font-size:1.1em'>Email : {req.Email} </h4>";
-            body += "<h4 style='font-size:1.1em'>Job Details </h4>";
-            body += $"<h4 style='font-size:1.1em'>Title : {req.Title} </h4>";
-            body += $"<h4 style='font-size:1.1em'>Description : {req.Description} </h4>";
-            body += $"<h4 style='font-size:1.1em'>Skills : {req.Skills} </h4>";
-            body += $"<h4 style='font-size:1.1em'>Location : {req.Location} </h4>";
-            var execute = await _userServices.ExecuteEmail(req.Email, sub, body);
+            body += "<h4 style='font-size:1.1em'>\nApplicant Details </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nName : {req.Applicant} </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nAddress : {req.Address} </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nEmail : {req.ApplicantEmail} </h4>";
+            body += "<h4 style='font-size:1.1em'>\nJob Details </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nTitle : {req.Title} </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nDescription : {req.Description} </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nSkills : {req.Skills} </h4>";
+            body += $"<h4 style='font-size:1.1em'>\nLocation : {req.Location} </h4>";
+            var execute = await _userServices.ExecuteEmail(req.RecruiterEmail, sub, body);
             if (execute == true)
                 return true;
             return false;

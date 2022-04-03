@@ -1,5 +1,6 @@
 ﻿using Database.Repository;
 using Models;
+using Models.DTOs;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,20 +15,20 @@ namespace Services.Jobs
             _jobsRepository = jobsRepository;
         }
 
-        public async Task<Job> Add(Job job)
+        public async Task<Job> Add(JobDTO job, int userId)
         {
             Job obj = new Job();
             obj.Title = job.Title;
             obj.Description = job.Description;
             obj.Skills = job.Skills;
             obj.Location = job.Location;
-            obj.CreatedBy = job.CreatedBy;
-            obj.ModifiedBy = job.CreatedBy;
+            obj.CreatedBy = userId;
+            obj.ModifiedBy = userId;
             obj.CreatedDate = DateTime.Now;
             obj.ModifiedDate = DateTime.Now;
             obj.IsActive = true;
-            await _jobsRepository.Add(obj);
-            return obj;
+            var info = await _jobsRepository.Add(obj);
+            return info;
         }
 
         public async Task<Job> Delete(int id)
@@ -44,25 +45,27 @@ namespace Services.Jobs
 
         public async Task<Job> GetById(int id)
         {
-            return await _jobsRepository.GetById(id);
+            var info =  await _jobsRepository.GetById(id);
+            return info;
         }
 
-        public async Task<Job> Update(Job job)
+        public async Task<Job> Update(JobDTO job, int userId, int id)
         {
-            var getById = await _jobsRepository.GetById(job.Id);
+            var info = new Job();
+            var getById = await _jobsRepository.GetById(id);
             if(getById != null)
             {
                 getById.Title = job.Title;
                 getById.Description = job.Description;
                 getById.Skills = job.Skills;
                 getById.Location = job.Location;
-                getById.ModifiedBy = job.CreatedBy;
+                getById.ModifiedBy = userId;
                 getById.ModifiedDate = DateTime.Now;
                 getById.IsActive = true;
-                await _jobsRepository.Update(getById);
-                return getById;
+                info = await _jobsRepository.Update(getById);
+                return info;
             }
-            return getById;
+            return info;
         }
     }
 }

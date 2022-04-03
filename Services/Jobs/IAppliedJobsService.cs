@@ -1,19 +1,16 @@
 ﻿using Models;
 using Models.DTOs;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.Jobs
 {
     public interface IAppliedJobsService
     {
-        Task<AppliedJob> Add(AppliedJob appliedJob);
-        Task<bool> SendMailToUser(Users users, Job jobs);
-        Task<bool> SendMailToRecruiter(Users users, Job jobs);
-        Task<AppliedJob> Update(int id, AppliedJob appliedJob);
+        Task<AppliedJob> Add(int jobId, int userId);
+        Task<bool> SendMailToUser(Users user, Job job);
+        Task<bool> SendMailToRecruiter(Users user, Job job);
         Task<AppliedJob> Delete(int id);
         Task<AppliedJob> GetById(int id);
         Task<IQueryable<AppliedJob>> GetAll();

@@ -3,14 +3,11 @@ using ADOServices.ADOServices.OTPServices;
 using ADOServices.ADOServices.RoleServices;
 using ADOServices.ADOServices.UserServices;
 using Database;
-using Database.ADO;
 using Database.Repository;
 using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +22,6 @@ using Services.OTPService;
 using Services.Roles;
 using Services.UserServices;
 using System;
-using System.Net;
 using System.Text;
 
 namespace API

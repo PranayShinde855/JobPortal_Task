@@ -1,8 +1,6 @@
 ﻿using Database.Repository;
-using Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Services.Roles
@@ -15,19 +13,19 @@ namespace Services.Roles
             _roleRepository = roleRepository;
         }
 
-        public async Task<Models.Roles> Add(Models.Roles role)
+        public async Task<Models.Roles> Add(string role, int userId)
         {
             try
             {
                 Models.Roles obj = new Models.Roles();
-                obj.Name = role.Name;
+                obj.Name = role;
                 obj.CreatedDate = DateTime.Now;
                 obj.ModifiedDate = DateTime.Now;
-                obj.CreatedBy = role.CreatedBy;
-                obj.ModifiedBy = role.ModifiedBy;
+                obj.CreatedBy = userId;
+                obj.ModifiedBy = userId;
                 obj.IsActive = true;
-                await _roleRepository.Add(obj);
-                return role;
+                var info = await _roleRepository.Add(obj);
+                return info;
             }
             catch(Exception ex)
             {
@@ -57,19 +55,20 @@ namespace Services.Roles
             return data;
         }
 
-        public async Task<Models.Roles> Update(int Id, Models.Roles role)
+        public async Task<Models.Roles> Update(int Id, string role, int userId, bool isActive)
         {
+            var info = new Models.Roles();
             var obj = await _roleRepository.GetById(Id);
             if(obj !=null)
             {
-                obj.Name = role.Name;
+                obj.Name = role;
                 obj.ModifiedDate = DateTime.Now;
-                obj.ModifiedBy = role.ModifiedBy;
-                obj.IsActive = role.IsActive;
-                await _roleRepository.Update(obj);
+                obj.ModifiedBy = userId;
+                obj.IsActive = isActive;
+                info = await _roleRepository.Update(obj);
                 return obj;
             }
-            return role;
+            return info;
         }
     }
 }

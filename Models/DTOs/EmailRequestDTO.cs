@@ -1,17 +1,12 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Models.DTOs
+﻿namespace Models.DTOs
 {
     public class EmailRequestDTO
     {
-        public string UserName { get; set; }
+        public string Recruiter{ get; set; }
+        public string RecruiterEmail{ get; set; }
+        public string Applicant { get; set; }
+        public string ApplicantEmail { get; set; }
         public string Address { get; set; }
-        public string Email { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Skills { get; set; }

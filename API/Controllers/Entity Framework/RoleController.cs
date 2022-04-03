@@ -55,19 +55,19 @@ namespace API.Controllers.Roles
 
         [HttpPost]
         [Route("Roles")]
-        public async Task<IActionResult> AddRole(Models.Roles role)
+        public async Task<IActionResult> AddRole(string role)
         {
             if(ModelState.IsValid)
-            return Ok(await _roleService.Add(role));
+            return Ok(await _roleService.Add(role, UserId));
 
             return BadRequest();
         }
 
         [HttpPut]
         [Route("Roles/{id}")]
-        public async Task<IActionResult> UpdateRole(int id, Models.Roles role)
+        public async Task<IActionResult> UpdateRole(int id, string role, bool isActive)
         {
-            return Ok(await _roleService.Update(id, role));
+            return Ok(await _roleService.Update(id, role, UserId, isActive));
         }
 
         [HttpDelete]

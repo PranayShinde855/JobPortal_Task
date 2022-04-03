@@ -7,10 +7,10 @@ namespace Services.UserServices
 {
     public interface IUserService
     {
-        Task<Users> AddUser(Users user);
-        Task<Users> AddRecruiter(Users user);
-        Task<Users> AddAdmin(Users user);
-        Task<Users> Update(int Id, Users user);
+        Task<Users> AddUser(UserRegistrationDTO req);
+        Task<Users> AddRecruiter(UserRegistrationDTO req);
+        Task<Users> AddAdmin(UserRegistrationDTO req);
+        Task<Users> Update(int Id, UserRegistrationDTO req);
         Task<bool> Delete(int Id);
         Task<Users> GetById(int Id);
         Task<IQueryable<Users>> GetAll();

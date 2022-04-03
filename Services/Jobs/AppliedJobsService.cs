@@ -6,8 +6,6 @@ using Services.UserServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace Services.Jobs
@@ -27,17 +25,17 @@ namespace Services.Jobs
             _jobService = jobService;
         }
 
-        public async Task<AppliedJob> Add(AppliedJob appliedJob)
+        public async Task<AppliedJob> Add(int jobId, int userId)
         {
             AppliedJob obj = new AppliedJob();
-            obj.JobId = appliedJob.JobId;
-            obj.AppliedBy = appliedJob.AppliedBy;
+            obj.JobId = jobId;
+            obj.AppliedBy = userId;
             obj.AppliedDate = DateTime.Now;
             obj.IsActive = true;
             await _appliedJobsRepository.Add(obj);
 
-            var getUserDetails = await _userService.GetById(appliedJob.AppliedBy);
-            var getJobDetails = await _jobService.GetById(appliedJob.JobId);
+            var getUserDetails = await _userService.GetById(userId);
+            var getJobDetails = await _jobService.GetById(jobId);
             var getRecruiterDetails = await _userService.GetById(getJobDetails.CreatedBy);
             await SendMailToRecruiter(getUserDetails, getJobDetails);
             await SendMailToUser(getRecruiterDetails, getJobDetails);

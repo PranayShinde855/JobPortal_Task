@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Models.DTOs;
 using Services.UserServices;
 using System;
 using System.Collections.Generic;
@@ -62,9 +63,9 @@ namespace API.Controllers.Users
         [HttpPut]
         [Authorize(Policy ="AllAllowed")]
         [Route("Users/{id}")]
-        public async Task<IActionResult> Update(int id, Models.Users user)
+        public async Task<IActionResult> Update(UserRegistrationDTO req)
         {
-            var result = await _userSerivce.Update(id, user);
+            var result = await _userSerivce.Update(UserId, req);
             if (result == null)
                 return NotFound();
 

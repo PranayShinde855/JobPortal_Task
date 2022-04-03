@@ -67,9 +67,9 @@ namespace API.Controllers.Jobs
         [HttpPost]
         [Authorize(Policy ="User")]
         [Route("Job")]
-        public async Task<IActionResult> AddJob(Job job)
+        public async Task<IActionResult> AddJob(JobDTO job)
         {
-            var info = await _jobService.Add(job);
+            var info = await _jobService.Add(job, UserId);
             if (info == null)
                 return NotFound();
 
@@ -79,9 +79,9 @@ namespace API.Controllers.Jobs
         [HttpPut]
         [Authorize(Policy ="Recruiter")]
         [Route("Jobs/{id}")]
-        public async Task<IActionResult> UpdateJobById(Job job)
+        public async Task<IActionResult> UpdateJobById(JobDTO job, int id)
         {
-            var info = await _jobService.Update(job);
+            var info = await _jobService.Update(job, UserId, id);
             if (info == null)
                 return NotFound();
 
@@ -103,17 +103,17 @@ namespace API.Controllers.Jobs
         [HttpPost]
         [Authorize(Policy ="User")]
         [Route("Jobs/Apply")]
-        public async Task<IActionResult> ApplyJob(AppliedJob appliedJob)
+        public async Task<IActionResult> ApplyJob(int jobId)
         {
             if(ModelState.IsValid)
             {
-                var chek = await _appliedJobsService.AlreadyAppliedToJob(appliedJob.JobId, appliedJob.AppliedBy);
+                var chek = await _appliedJobsService.AlreadyAppliedToJob(jobId, UserId);
                 if(chek == false)
                 {
                     try
                     {
-                        var appliedJobStatus = await _appliedJobsService.Add(appliedJob);
-                        return Ok(appliedJob);
+                        var appliedJobStatus = await _appliedJobsService.Add(jobId, UserId);
+                        return Ok(appliedJobStatus);
                     }
                     catch (Exception ex)
                     {
@@ -163,18 +163,6 @@ namespace API.Controllers.Jobs
                 _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
             }
             return Ok(result);
-        }
-
-        [HttpPut]
-        [Authorize(Policy ="User")]
-        [Route("AppliedJobs/Applicant/{id}")]
-        public async Task<IActionResult> UpdateAppliedJob(int id, AppliedJob appliedJob)
-        {
-            if (ModelState.IsValid)
-            {
-                return Ok(await _appliedJobsService.Update(id, appliedJob));
-            }
-            return BadRequest();
         }
 
         [HttpDelete]

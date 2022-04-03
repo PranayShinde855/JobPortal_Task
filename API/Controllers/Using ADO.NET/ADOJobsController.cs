@@ -1,17 +1,13 @@
 ﻿using ADOServices.ADOServices.Jobs;
 using Database;
-using Database.ADO;
 using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Models;
 using Models.DTOs;
-using Services.ADOServices.Jobs;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 
 namespace API.Controllers.Using_ADO.NET
@@ -75,7 +71,7 @@ namespace API.Controllers.Using_ADO.NET
             {
             if (ModelState.IsValid)
             {
-                var info = await _jobsServiceADO.Add(job/*, UserId*/);
+                var info = await _jobsServiceADO.Add(job, UserId);
                 if (info == true)
                     return Ok(info);
                 return BadRequest(new SomeException("An error occured.", info));
@@ -91,7 +87,7 @@ namespace API.Controllers.Using_ADO.NET
             var checkId = await _jobsServiceADO.GetById(id);
             if (checkId != null)
             {
-                var info = await _jobsServiceADO.Update(job/*, UserId*/, id);
+                var info = await _jobsServiceADO.Update(job, UserId, id);
                 if (info == true)
                     return Ok(info);
                 return BadRequest(new SomeException("An error occured.", info));
@@ -148,18 +144,18 @@ namespace API.Controllers.Using_ADO.NET
         [Route("AppliedJobs/Applicant")]
         public async Task<IActionResult> GetAllJobsAppliedByMe()
         {
-            //var cacheKey = "result";
-            //if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<AppliedJobDTO> result))
-            //{
-            var    result = await _appliedJobsServicesADO.GetAllJobsAppliedByMe(UserId);
-            //    var cacheExpiryOptions = new MemoryCacheEntryOptions
-            //    {
-            //        AbsoluteExpiration = DateTime.Now.AddMinutes(5),
-            //        Priority = CacheItemPriority.High,
-            //        SlidingExpiration = TimeSpan.FromMinutes(2)
-            //    };
-            //    _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
-            //}
+            var cacheKey = "result";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<AppliedJobDTO> result))
+            {
+                  result = await _appliedJobsServicesADO.GetAllJobsAppliedByMe(UserId);
+                var cacheExpiryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+                    Priority = CacheItemPriority.High,
+                    SlidingExpiration = TimeSpan.FromMinutes(2)
+                };
+                _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
+            }
             return Ok(result);
         }
 

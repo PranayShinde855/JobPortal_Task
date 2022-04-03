@@ -1,11 +1,8 @@
 ﻿using ADOServices.ADOServices.Jobs;
 using Database.ADO;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Models;
 using Models.DTOs;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,7 +12,7 @@ namespace Services.ADOServices.Jobs
 {
     public class JobsServices : IJobsServices
     {
-        public async Task<bool> Add(JobDTO job)
+        public async Task<bool> Add(JobDTO job, int userId)
         {
             string query = "INSERT INTO Jobs(Title, Description, skills, Location, CreatedBy, ModifiedBy, " +
                 "CreatedDate, ModifiedDate, IsActive) VALUES(@Title, @Description, @skills, @Location," +
@@ -27,8 +24,8 @@ namespace Services.ADOServices.Jobs
                 new SqlParameter("@Description", Convert.ToString(job.Description)),
                 new SqlParameter("@skills", Convert.ToString(job.Skills)),
                 new SqlParameter("@Location", Convert.ToString(job.Location)),
-                new SqlParameter("@CreatedBy", Convert.ToInt32(0)),
-                new SqlParameter("@ModifiedBy", Convert.ToInt32(0)),
+                new SqlParameter("@CreatedBy", Convert.ToInt32(userId)),
+                new SqlParameter("@ModifiedBy", Convert.ToInt32(userId)),
                 new SqlParameter("@CreatedDate", Convert.ToDateTime(DateTime.Now)),
                 new SqlParameter("@ModifiedDate", Convert.ToDateTime(DateTime.Now)),
                 new SqlParameter("@IsActive", Convert.ToBoolean(job.IsActive))
@@ -64,7 +61,7 @@ namespace Services.ADOServices.Jobs
             return obj;
         }
 
-        public async Task<bool> Update(JobDTO job/*, int userId*/, int id)
+        public async Task<bool> Update(JobDTO job, int userId, int id)
         {
             string query = "Update Jobs Set Title = @Title, Description = @Description, skills = @skills, Location = @Location, ModifiedDate = @ModifiedDate" +
                 ",ModifiedBy = @ModifiedBy, IsActive = @IsActive WHERE Id = '"+ id +"' ";
@@ -75,8 +72,7 @@ namespace Services.ADOServices.Jobs
                 new SqlParameter("@skills",Convert.ToString(job.Skills)),
                 new SqlParameter("@Location", Convert.ToString(job.Location)),
                 new SqlParameter("@ModifiedDate", Convert.ToDateTime(DateTime.Now)),
-                //new SqlParameter("@ModifiedBy", Convert.ToInt32(userId)),
-                new SqlParameter("@ModifiedBy", Convert.ToInt32(0)),
+                new SqlParameter("@ModifiedBy", Convert.ToInt32(userId)),
                 new SqlParameter("@IsActive", Convert.ToBoolean(job.IsActive))
            };
             var data = await DB<Job>.ExecuteData(query, parameters);

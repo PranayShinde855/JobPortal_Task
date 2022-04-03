@@ -1,7 +1,6 @@
 ﻿using ADOServices.ADOServices.OTPServices;
 using ADOServices.ADOServices.UserServices;
 using GlobalExceptionHandling.WebApi;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Models.DTOs;

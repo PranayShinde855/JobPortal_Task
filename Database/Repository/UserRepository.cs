@@ -1,5 +1,4 @@
 ﻿using Database.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using Models;
 
 namespace Database.Repository
