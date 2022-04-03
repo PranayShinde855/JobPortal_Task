@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using GlobalExceptionHandling.WebApi;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Models.DTOs;
 using Services.OTPService;
 using Services.Roles;
@@ -19,34 +21,37 @@ namespace API.Controllers
         protected readonly IRoleService _roleSerivce;
         protected readonly IConfiguration _configuration;
         protected readonly IOTPService _oTPService;
+        private readonly ILogger<AccountController> _logger;
 
-        
+
         public AccountController(IUserService userSerivce, IRoleService roleService, 
-            IConfiguration configuration, IOTPService oTPService)
+            IConfiguration configuration, IOTPService oTPService, ILogger<AccountController> logger)
         {
             _userSerivce = userSerivce;
             _roleSerivce = roleService;
             _configuration = configuration;
             _oTPService = oTPService;
+            _logger = logger;
         }
 
         [HttpPost]
         [Authorize(Policy ="Admin")]
         [Route("Registration/Admin")]
-        public async Task<IActionResult> AddRegistration(UserRegistrationDTO req)
+        public async Task<IActionResult> AdminRegistration(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)
             {
-                bool checckEmail = await _userSerivce.CheckEmailIdExist(req.Email);
-                if (checckEmail == false)
+                var checkEmail = await _userSerivce.CheckEmailIdExist(req.Email);
+                if (checkEmail == false)
                 {
-                    await _userSerivce.AddAdmin(req);
-                    return Ok();
+                    var info = await _userSerivce.AddAdmin(req);
+                    return Ok(new SomeException("Saved", info));
                 }
 
-                return BadRequest("This email address is already taken. Please use another eamil address.");
+                return NotFound(new SomeException("This email address is already taken." +
+                    " Please use another eamil address.", req.Email));
             }
-            return BadRequest(ModelState);
+            return BadRequest(new SomeException("Required fileds ", ModelState));
         }
 
         [AllowAnonymous]
@@ -56,15 +61,17 @@ namespace API.Controllers
         {
             if (ModelState.IsValid)
             {
-                bool checkEmail = await _userSerivce.CheckEmailIdExist(req.Email);
+                var checkEmail = await _userSerivce.CheckEmailIdExist(req.Email);
                 if (checkEmail == false)
                 {
-                    await _userSerivce.AddUser(req);
-                    return Ok();
+                    var info = await _userSerivce.AddUser(req);
+                    return Ok(new SomeException("Saved", info));
                 }
-                return BadRequest(ModelState);
+
+                return NotFound(new SomeException("This email address is already taken." +
+                    " Please use another eamil address.", req.Email));
             }
-            return BadRequest(ModelState);
+            return BadRequest(new SomeException("Required fileds ", ModelState));
         }
 
         [HttpPost]
@@ -76,8 +83,8 @@ namespace API.Controllers
                 bool checckEmail = await _userSerivce.CheckEmailIdExist(req.Email);
                 if (checckEmail == false)
                 {
-                    await _userSerivce.AddRecruiter(req);
-                    return Ok();
+                    var info = await _userSerivce.AddRecruiter(req);
+                    return Ok(new SomeException("Saved", info));
                 }
                 return BadRequest("This email address is already taken. Please use another eamil address.");
             }
@@ -104,9 +111,9 @@ namespace API.Controllers
                     obj.Role = userRole.Name;
                     return Ok(await _userSerivce.GenerateToken(obj));
                 }
-                return BadRequest("UserName or Password is invalid.");
+                return NotFound(new SomeException("UserName or Password is invalid.", email, password)); ;
             }
-            return BadRequest("Please enter UserName and Password.");
+            return BadRequest(new SomeException("Please enter UserName and Password.", ModelState));
         }
 
         [AllowAnonymous]
@@ -119,12 +126,11 @@ namespace API.Controllers
             {
                 var sendMail = await _userSerivce.SendMail(data);
                 if (sendMail == true)
-                    return Ok(true);
+                    return Ok(new SomeException("OTP send to registered email.", sendMail));
 
-                return BadRequest();
+                return BadRequest(new SomeException("An error occured", sendMail));
             }
-        
-            return BadRequest();
+            return NotFound(new SomeException($"Emai does not exist {email}."));
         }
 
         [AllowAnonymous]
@@ -136,13 +142,12 @@ namespace API.Controllers
             if(getUser != null)
             {
                 var result = await _userSerivce.ResetPassword(dto, getUser.UserId);
-
                 if (result == true)
-                    return Ok();
+                    return Ok(new SomeException("Password reset successfully.", result));
 
-                return BadRequest();
+                return BadRequest(new SomeException("An error occured.", result));
             }
-            return NotFound();
+            return NotFound(new SomeException("Please enter OTP send to email.", getUser));
         }
     }
 }

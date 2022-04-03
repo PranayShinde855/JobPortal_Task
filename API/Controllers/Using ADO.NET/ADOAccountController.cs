@@ -59,7 +59,6 @@ namespace API.Controllers.Using_ADO.NET
                 {
                     var info = await _userServices.AddRecruiter(req);
                     if (info == true)
-                        //return Ok(true);
                         throw new SomeException("Saved", info);
                 }
                 return NotFound(new SomeException("This email address is already taken." +
@@ -123,7 +122,7 @@ namespace API.Controllers.Using_ADO.NET
             {
                 var sendMail = await _userServices.SendMail(data);
                 if (sendMail == true)
-                    return Ok((new SomeException("OTP send to registered email."), sendMail));
+                    return Ok(new SomeException("OTP send to registered email.", sendMail));
 
                 return BadRequest(new SomeException("An error occured.", sendMail));
             }
@@ -140,7 +139,7 @@ namespace API.Controllers.Using_ADO.NET
             {
                 var result = await _userServices.ResetPassword(dto, getUser.UserId);
                 if (result == true)
-                    return Ok(new SomeException("Password is reset successfully.", result));
+                    return Ok(new SomeException("Password reset successfully.", result));
 
                 return BadRequest(new SomeException("An error occured.", result));
             }
