@@ -5,9 +5,12 @@ using ADOServices.ADOServices.UserServices;
 using Database;
 using Database.ADO;
 using Database.Repository;
+using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +25,7 @@ using Services.OTPService;
 using Services.Roles;
 using Services.UserServices;
 using System;
+using System.Net;
 using System.Text;
 
 namespace API
@@ -38,6 +42,8 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMemoryCache();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddDbContext<DbContextModel>(options =>
@@ -138,6 +144,8 @@ namespace API
                     }
                 });
             });
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -158,16 +166,33 @@ namespace API
                                           .AllowAnyHeader()
                                           .AllowAnyMethod());
 
+            app.UseMiddleware<ErrorHandlerMiddleware>();
+
             app.UseAuthentication();
 
             app.UseAuthorization();
-
-            app.UseMiddleware<ErrorHandlerMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            //app.UseExceptionHandler(
+            //     options =>
+            //    {
+            //        options.Run(async context =>
+            //        {
+            //            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            //            context.Response.ContentType = "text/html";
+            //            var exceptionObject = context.Features.Get<IExceptionHandlerFeature>();
+            //            if (null != exceptionObject)
+            //            {
+            //                var errorMessage = $"{exceptionObject.Error.Message}";
+            //                await context.Response.WriteAsync(errorMessage).ConfigureAwait(false);
+            //            }
+            //        });
+            //    });
+
         }
     }
 }

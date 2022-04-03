@@ -13,31 +13,8 @@ namespace Database.ADO
 {
     public static class DB<T> where T : class
     {
-     
-
         public static string source = "Data Source=DESKTOP-HKULI1B;Initial Catalog=JobPortalDB;user id=sa;password=spark";
-        public async static Task<DataTable> GetDataTable(string str)
-        {
-            DataTable dt = new DataTable();
-            SqlDataReader reader;
-            try
-            {
-                using (SqlConnection con = new SqlConnection(source))
-                {
-                    con.Open();
-                    SqlCommand cmd = new SqlCommand(str, con);
-                    reader = cmd.ExecuteReader();
-                    dt.Load(reader);
-                    reader.Close();
-                    con.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            return dt;
-        }
+
         public async static Task<int> ExecuteData(string str)
         {
             int rows = -1;
@@ -56,6 +33,7 @@ namespace Database.ADO
             }
             return rows;
         }
+
         public async static Task<int> ExecuteData(string str, params IDataParameter[] parameters)
         {
             int rows = -1;
@@ -82,6 +60,7 @@ namespace Database.ADO
             }
             return rows;
         }
+
         public async static Task<T> GetSingleRecord(string sql)
         {
             var tcs = new TaskCompletionSource<List<T>>();
@@ -105,6 +84,7 @@ namespace Database.ADO
                 }
             }
         }
+
         public async static Task<IEnumerable<T>> GetList(string sql)
         {
             var tcs = new TaskCompletionSource<List<T>>();

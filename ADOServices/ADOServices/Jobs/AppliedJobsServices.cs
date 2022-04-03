@@ -50,35 +50,38 @@ namespace ADOServices.ADOServices.Jobs
 
         public async Task<IEnumerable<AppliedJobDTO>> GetAll()
         {
-            string query = "SELECT aj.Id, j.Title, j.Description, j.skills, j.Location, " +
-                 "j.CreatedBy, ua.UserName AS CreatedByUser, aj.AppliedBy, us.UserName AS AppliedByUser" +
-                 " FROM AppliedJobs aj LEFT JOIN Jobs j ON aj.JobId = j.Id " +
-                 "LEFT JOIN Users us ON aj.AppliedBy = us.UserId " +
-                 "LEFT JOIN Users ua ON j.CreatedBy = ua.UserId ";
+            string query = "SELECT aj.Id AS Id, j.Title AS Title, j.Description AS Description, j.skills AS Skills, j.Location AS Location" +
+                            ", j.CreatedBy AS CreatedBy, ua.UserName AS CreatedByName, aj.AppliedBy AS AppliedBy" +
+                            ", us.UserName AS AppliedByName, aj.IsActive AS IsActive" +
+                            " FROM AppliedJobs aj LEFT JOIN Jobs j ON aj.JobId = j.Id " +
+                            "LEFT JOIN Users us ON aj.AppliedBy = us.UserId " +
+                            "LEFT JOIN Users ua ON j.CreatedBy = ua.UserId ";
             IEnumerable <AppliedJobDTO> obj = await DB<AppliedJobDTO>.GetList(query);
             return obj;
         }
 
         public async Task<IEnumerable<AppliedJobDTO>> GetAllApplicantAppliedToMyJobs(int userId)
         {
-            string query = "SELECT aj.Id, j.Title, j.Description, j.skills, j.Location, " +
-                "j.CreatedBy, ua.UserName AS CreatedByUser, aj.AppliedBy, us.UserName AS AppliedByUser" +
-                " FROM AppliedJobs aj LEFT JOIN Jobs j ON aj.JobId = j.Id " +
-                "LEFT JOIN Users us ON aj.AppliedBy = us.UserId " +
-                "LEFT JOIN Users ua ON j.CreatedBy = ua.UserId " +
-                "WHERE j.CreatedBy = '" + userId + " '";
+            string query = "SELECT aj.Id AS Id, j.Title AS Title, j.Description AS Description, j.skills AS Skills, j.Location AS Location" +
+                            ", j.CreatedBy AS CreatedBy, ua.UserName AS CreatedByName, aj.AppliedBy AS AppliedBy" +
+                            ", us.UserName AS AppliedByName, aj.IsActive AS IsActive" +
+                            " FROM AppliedJobs aj LEFT JOIN Jobs j ON aj.JobId = j.Id " +
+                            "LEFT JOIN Users us ON aj.AppliedBy = us.UserId " +
+                            "LEFT JOIN Users ua ON j.CreatedBy = ua.UserId " +
+                            "WHERE j.CreatedBy = '" + userId + " '";
             IEnumerable<AppliedJobDTO> obj = await DB<AppliedJobDTO>.GetList(query);
             return obj;
         }
 
         public async Task<IEnumerable<AppliedJobDTO>> GetAllJobsAppliedByMe(int userId)
         {
-            string query = "SELECT aj.Id, j.Title, j.Description, j.skills, j.Location, " +
-               "j.CreatedBy, ua.UserName AS CreatedByUser, aj.AppliedBy, us.UserName AS AppliedByUser" +
-               " FROM AppliedJobs aj LEFT JOIN Jobs j ON aj.JobId = j.Id " +
-               "LEFT JOIN Users us ON aj.AppliedBy = us.UserId " +
-               "LEFT JOIN Users ua ON j.CreatedBy = ua.UserId " +
-               "WHERE aj.AppliedBy = '" + userId + " '";
+            string query =  "SELECT aj.Id AS Id, j.Title AS Title, j.Description AS Description, j.skills AS Skills, j.Location AS Location" +
+                            ", j.CreatedBy AS CreatedBy, ua.UserName AS CreatedByName, aj.AppliedBy AS AppliedBy" +
+                            ", us.UserName AS AppliedByName, aj.IsActive AS IsActive" +
+                            " FROM AppliedJobs aj LEFT JOIN Jobs j ON aj.JobId = j.Id " +
+                            "LEFT JOIN Users us ON aj.AppliedBy = us.UserId " +
+                            "LEFT JOIN Users ua ON j.CreatedBy = ua.UserId " +
+                            "WHERE aj.AppliedBy = '" + userId + " '";
             IEnumerable < AppliedJobDTO > obj = await DB<AppliedJobDTO>.GetList(query);
             return obj;
         }

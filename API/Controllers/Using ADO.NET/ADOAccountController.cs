@@ -1,7 +1,9 @@
 ﻿using ADOServices.ADOServices.OTPServices;
 using ADOServices.ADOServices.UserServices;
+using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Models.DTOs;
 using Services.ADOServices.RoleServices;
 using System.Threading.Tasks;
@@ -15,11 +17,14 @@ namespace API.Controllers.Using_ADO.NET
         public readonly IUserServices _userServices;
         public readonly IOTPServices _oTPServices;
         public readonly IRoleServices _roleServices;
-        public ADOAccountController(IUserServices userServices, IOTPServices oTPServices, IRoleServices roleServices)
+        private readonly ILogger<ADOAccountController> _logger;
+        public ADOAccountController(IUserServices userServices, IOTPServices oTPServices, IRoleServices roleServices
+            , ILogger<ADOAccountController> logger)
         {
             _userServices = userServices;
             _oTPServices = oTPServices;
             _roleServices = roleServices;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -34,11 +39,13 @@ namespace API.Controllers.Using_ADO.NET
                 {
                     var info = await _userServices.AddAdmin(req);
                     if (info == true)
-                        return Ok(true);
+                        //return Ok(true);
+                        return Ok(new  SomeException ("Saved", req));
                 }
-                return BadRequest("This email address is already taken. Please use another eamil address.");
+                return NotFound(new SomeException("This email address is already taken." +
+                    " Please use another eamil address.", req.Email));
             }
-            return BadRequest(ModelState);
+            return BadRequest(new SomeException("Required fileds ", ModelState));
         }
 
         [HttpPost]
@@ -53,11 +60,13 @@ namespace API.Controllers.Using_ADO.NET
                 {
                     var info = await _userServices.AddRecruiter(req);
                     if (info == true)
-                        return Ok(true);
+                        //return Ok(true);
+                        throw new SomeException("Saved", info);
                 }
-                return BadRequest("This email address is already taken. Please use another eamil address.");
+                return NotFound(new SomeException("This email address is already taken." +
+                    " Please use another eamil address.", req.Email));
             }
-            return BadRequest(ModelState);
+            return BadRequest(new SomeException("Please fill all the details.", ModelState));
         }
 
         [HttpPost]
@@ -74,12 +83,13 @@ namespace API.Controllers.Using_ADO.NET
                     if (info == true)
                         return Ok(true);
                 }
-                return BadRequest("This email address is already taken. Please use another eamil address.");
+                return NotFound(new SomeException("This email address is already taken." +
+                    " Please use another eamil address.", req.Email));
             }
-            return BadRequest(ModelState); ;
+            return BadRequest(new SomeException("Please fill all the details.", ModelState));
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("Login")]
         public async Task<IActionResult> Login(string email, string password)
@@ -99,12 +109,12 @@ namespace API.Controllers.Using_ADO.NET
                     obj.Role = roleInfo.Name;
                     return Ok(await _userServices.GenerateToken(obj));
                 }
-                return BadRequest("UserName or Password is invalid.");
+                return NotFound(new SomeException("UserName or Password is invalid.", email, password));
             }
-            return BadRequest("Please enter UserName and Password.");
+            return BadRequest(new SomeException("Please enter UserName and Password.", ModelState));
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("ForgotPassword")]
         public async Task<IActionResult> ForgotPassword(string email)
@@ -114,15 +124,14 @@ namespace API.Controllers.Using_ADO.NET
             {
                 var sendMail = await _userServices.SendMail(data);
                 if (sendMail == true)
-                    return Ok(true);
+                    return Ok((new SomeException("OTP send to registered email."), sendMail));
 
-                return BadRequest();
+                return BadRequest(new SomeException("An error occured.", sendMail));
             }
-
-            return BadRequest();
+            return BadRequest(new SomeException("Email does not exist.", email));
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("ResetPassword")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDTO dto)
@@ -131,13 +140,12 @@ namespace API.Controllers.Using_ADO.NET
             if (getUser != null)
             {
                 var result = await _userServices.ResetPassword(dto, getUser.UserId);
-
                 if (result == true)
-                    return Ok();
+                    return Ok(new SomeException("Password is reset successfully.", result));
 
-                return BadRequest();
+                return BadRequest(new SomeException("An error occured.", result));
             }
-            return NotFound();
+            return NotFound(new SomeException("Please enter OTP send to email.", getUser));
         }
     }
 }

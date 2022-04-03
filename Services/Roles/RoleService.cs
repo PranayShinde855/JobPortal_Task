@@ -46,7 +46,7 @@ namespace Services.Roles
             return false;
         }
 
-        public async Task<IQueryable<Models.Roles>> GetAll()
+        public async Task<IEnumerable<Models.Roles>> GetAll()
         {
             return await _roleRepository.GetAll();
         }

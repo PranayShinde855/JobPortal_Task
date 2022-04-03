@@ -11,6 +11,6 @@ namespace Services.Roles
         Task<Models.Roles> Update(int Id, Models.Roles role);
         Task<bool> Delete(int Id);
         Task<Models.Roles> GetById(int Id);
-        Task<IQueryable<Models.Roles>> GetAll();
+        Task<IEnumerable<Models.Roles>> GetAll();
     }
 }

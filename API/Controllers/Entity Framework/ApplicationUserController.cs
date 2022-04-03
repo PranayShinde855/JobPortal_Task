@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Services.UserServices;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace API.Controllers.Users
@@ -12,9 +16,14 @@ namespace API.Controllers.Users
     public class ApplicationUserController : BaseController
     {
         protected readonly IUserService _userSerivce;
-        public ApplicationUserController(IUserService userSerivce)
+        protected readonly IMemoryCache _memoryCache;
+        protected readonly DbContextModel _dbContext;
+
+        public ApplicationUserController(IUserService userSerivce, IMemoryCache memoryCache, DbContextModel dbContext)
         {
             _userSerivce = userSerivce;
+            _memoryCache = memoryCache;
+            _dbContext = dbContext;
         }
 
         [HttpGet]
@@ -22,7 +31,19 @@ namespace API.Controllers.Users
         [Route("Users")]
         public async Task<IActionResult> Get()
         {
-            return Ok(await _userSerivce.GetAll());
+            var cacheKey = "result";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Models.Users> result))
+            {
+                result = await _userSerivce.GetAll();
+                var cacheExpiryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+                    Priority = CacheItemPriority.High,
+                    SlidingExpiration = TimeSpan.FromMinutes(2)
+                };
+                _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
+            }
+            return Ok(result);
         }
 
         [HttpGet]

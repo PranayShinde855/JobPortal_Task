@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Servic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "API\API.csproj", "{99856C62-5793-469A-9A0D-9190CEF6B6E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADOServices", "ADOServices\ADOServices.csproj", "{C0E65F35-C7D8-4B48-81FC-60906EB3CED6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ADOServices", "ADOServices\ADOServices.csproj", "{C0E65F35-C7D8-4B48-81FC-60906EB3CED6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExceptionHandling", "ExceptionHandling\ExceptionHandling.csproj", "{3E093629-A075-4EAD-86FB-260F13782ECA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{C0E65F35-C7D8-4B48-81FC-60906EB3CED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0E65F35-C7D8-4B48-81FC-60906EB3CED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0E65F35-C7D8-4B48-81FC-60906EB3CED6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E093629-A075-4EAD-86FB-260F13782ECA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E093629-A075-4EAD-86FB-260F13782ECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E093629-A075-4EAD-86FB-260F13782ECA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E093629-A075-4EAD-86FB-260F13782ECA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

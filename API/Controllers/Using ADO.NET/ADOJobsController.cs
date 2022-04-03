@@ -1,10 +1,15 @@
 ﻿using ADOServices.ADOServices.Jobs;
+using Database;
 using Database.ADO;
+using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Models;
 using Models.DTOs;
 using Services.ADOServices.Jobs;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
@@ -17,35 +22,54 @@ namespace API.Controllers.Using_ADO.NET
     {
         protected readonly IJobsServices _jobsServiceADO;
         protected readonly IAppliedJobsServices _appliedJobsServicesADO;
-        public ADOJobsController(IJobsServices jobsServiceADO, IAppliedJobsServices appliedJobsServicesADO)
+        protected readonly ILogger<ADOJobsController> _logger;
+        protected readonly IMemoryCache _memoryCache;
+        protected readonly DbContextModel _dbContext;
+        public ADOJobsController(IJobsServices jobsServiceADO, IAppliedJobsServices appliedJobsServicesADO, ILogger<ADOJobsController> logger
+            , IMemoryCache memoryCache, DbContextModel dbContext)
         {
             _jobsServiceADO = jobsServiceADO;
             _appliedJobsServicesADO = appliedJobsServicesADO;
+            _logger = logger;
+            _memoryCache = memoryCache;
+            _dbContext = dbContext;
         }
 
         [HttpGet]
-        ////[Authorize(Policy = "AllAllowed")]
+        [Authorize(Policy = "AllAllowed")]
         [AllowAnonymous]
         [Route("Jobs")]
         public async Task<ActionResult> GetAllJobs()
         {
-            return Ok(await _jobsServiceADO.GetAll());
+            var cacheKey = "result";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Models.Job> result))
+            {
+                result = await _jobsServiceADO.GetAll();
+                var cacheExpiryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+                    Priority = CacheItemPriority.High,
+                    SlidingExpiration = TimeSpan.FromMinutes(2)
+                };
+                _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
+            }
+            return Ok(result);
         }
 
 
         [HttpGet]
-        //[Authorize(Policy = "AllAllowed")]
+        [Authorize(Policy = "AllAllowed")]
         [Route("Jobs/{id}")]
         public async Task<IActionResult> GetJobById(int id)
         {
             var info = await _jobsServiceADO.GetById(id);
             if (info != null)
                 return Ok(info);
-            return NotFound(id);
+            return NotFound(new SomeException($"Job not found {id}"));
         }
 
         [HttpPost]
-        ////[Authorize(Policy = "User")]
+        [Authorize(Policy = "User")]
         [Route("Job")]
         public async Task<IActionResult> AddJob(JobDTO job)
             {
@@ -54,77 +78,106 @@ namespace API.Controllers.Using_ADO.NET
                 var info = await _jobsServiceADO.Add(job/*, UserId*/);
                 if (info == true)
                     return Ok(info);
-                return BadRequest("Not Saved");
+                return BadRequest(new SomeException("An error occured.", info));
             }
             return BadRequest(ModelState);
         }
 
         [HttpPut]
-        //[Authorize(Policy = "Recruiter")]
+        [Authorize(Policy = "Recruiter")]
         [Route("Jobs/{id}")]
         public async Task<IActionResult> UpdateJobById(JobDTO job, int id)
-            {
+        {
             var checkId = await _jobsServiceADO.GetById(id);
-            if(checkId != null)
+            if (checkId != null)
             {
                 var info = await _jobsServiceADO.Update(job/*, UserId*/, id);
                 if (info == true)
                     return Ok(info);
-                return BadRequest();
+                return BadRequest(new SomeException("An error occured.", info));
             }
-            return NotFound();
+            return NotFound(new SomeException($"Job not found {id}"));
         }
 
         [HttpDelete]
-        //[Authorize(Policy = "Recruiter")]
+        [Authorize(Policy = "Recruiter")]
         [Route("Jobs/{id}")]
         public async Task<IActionResult> DeleteJob(int id)
         {
             var info = await _jobsServiceADO.Delete(id);
             if (info == true)
                 return Ok(info);
-            return NotFound();
+            return NotFound(new SomeException($"Job not found {id}"));
         }
 
         [HttpPost]
-        //[Authorize(Policy = "User")]
+        [Authorize(Policy = "User")]
         [Route("Jobs/Apply")]
         public async Task<IActionResult> ApplyJob(int jobId)
         {
-            return Ok(await _appliedJobsServicesADO.Add(jobId, UserId));
+            var checkJob = await _jobsServiceADO.GetById(jobId);
+            {
+                var info = await _appliedJobsServicesADO.Add(jobId, UserId);
+                return Ok(info);
+            }
+            return NotFound(new SomeException($"Job not found {jobId}"));
         }
 
         [HttpGet]
         [Route("AppliedJobs/Recruiter")]
-        //[Authorize(Policy = "Recruiter")]
+        [Authorize(Policy = "Recruiter")]
         public async Task<IActionResult> GetAllApplicantAppliedToMyJobs()
         {
-            if (ModelState.IsValid)
+            var cacheKey = "result";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<AppliedJobDTO> result))
             {
-                return Ok(await _appliedJobsServicesADO.GetAllApplicantAppliedToMyJobs(UserId));
+                  result = await _appliedJobsServicesADO.GetAllApplicantAppliedToMyJobs(UserId);
+                var cacheExpiryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+                    Priority = CacheItemPriority.High,
+                    SlidingExpiration = TimeSpan.FromMinutes(2)
+                };
+                _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
             }
-            return BadRequest();
+            return Ok(result);
         }
 
-        //[Authorize(Policy = "User")]
+        [Authorize(Policy = "User")]
         [HttpGet]
         [Route("AppliedJobs/Applicant")]
         public async Task<IActionResult> GetAllJobsAppliedByMe()
         {
-            return Ok(await _appliedJobsServicesADO.GetAllJobsAppliedByMe(UserId));
+            //var cacheKey = "result";
+            //if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<AppliedJobDTO> result))
+            //{
+            var    result = await _appliedJobsServicesADO.GetAllJobsAppliedByMe(UserId);
+            //    var cacheExpiryOptions = new MemoryCacheEntryOptions
+            //    {
+            //        AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+            //        Priority = CacheItemPriority.High,
+            //        SlidingExpiration = TimeSpan.FromMinutes(2)
+            //    };
+            //    _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
+            //}
+            return Ok(result);
         }
 
         [HttpDelete]
-        //[Authorize(Policy = "User")]
+        [Authorize(Policy = "User")]
         [Route("AppliedJobs/Applicant/{id}")]
         public async Task<IActionResult> DeleteAppliedJob(int id)
         {
             var checkJob = await _appliedJobsServicesADO.GetById(id);
             if (checkJob != null)
             {
-                return Ok(await _appliedJobsServicesADO.Delete(id));
+                var result = await _appliedJobsServicesADO.Delete(id);
+                if(result == true)
+                    return Ok();
+
+                return BadRequest(new SomeException("An error occured.", result));
             }
-            return NotFound(id);
+            return NotFound(new SomeException($"Job not found {id}"));
         }
 
     }

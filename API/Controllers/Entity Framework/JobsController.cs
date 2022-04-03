@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Models;
+using Models.DTOs;
 using Services.Jobs;
 using Services.UserServices;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace API.Controllers.Jobs
@@ -16,10 +20,16 @@ namespace API.Controllers.Jobs
     {
         private readonly IJobService _jobService;
         private readonly IAppliedJobsService _appliedJobsService;
-        public JobsController(IJobService jobService, IAppliedJobsService appliedJobsService, IUserService userService)
+
+        protected readonly IMemoryCache _memoryCache;
+        protected readonly DbContextModel _dbContext;
+        public JobsController(IJobService jobService, IAppliedJobsService appliedJobsService, IUserService userService,
+            IMemoryCache memoryCache, DbContextModel dbContext)
         {
             _jobService = jobService;
             _appliedJobsService = appliedJobsService;
+            _memoryCache = memoryCache;
+            _dbContext = dbContext;
         }
 
         [HttpGet]
@@ -27,7 +37,19 @@ namespace API.Controllers.Jobs
         [Route("Jobs")]
         public async Task<IActionResult> GetAllJobs()
         {
-            return Ok(await _jobService.GetAll());
+            var cacheKey = "result";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Models.Job> result))
+            {
+                result = await _jobService.GetAll();
+                var cacheExpiryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+                    Priority = CacheItemPriority.High,
+                    SlidingExpiration = TimeSpan.FromMinutes(2)
+                };
+                _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
+            }
+            return Ok(result);
         }
 
         [HttpGet]
@@ -108,11 +130,19 @@ namespace API.Controllers.Jobs
         [Authorize(Policy = "Recruiter")]
         public async Task<IActionResult> GetAllApplicantAppliedToMyJobs()
         {
-            if (ModelState.IsValid)
+            var cacheKey = "result";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<AppliedJobDTO> result ))
             {
-                return Ok(await _appliedJobsService.GetAllApplicantAppliedToMyJobs(UserId));
+                result = await _appliedJobsService.GetAllApplicantAppliedToMyJobs(UserId);
+                var cacheExpiryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+                    Priority = CacheItemPriority.High,
+                    SlidingExpiration = TimeSpan.FromMinutes(2)
+                };
+                _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
             }
-            return BadRequest();
+            return Ok(result);
         }
 
         [Authorize(Policy = "User")]
@@ -120,7 +150,19 @@ namespace API.Controllers.Jobs
         [Route("AppliedJobs/Applicant")]
         public async Task<IActionResult> GetAllJobsAppliedByMe()
         {
-            return Ok(await _appliedJobsService.GetAllJobsAppliedByMe(UserId));
+            var cacheKey = "result";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<AppliedJobDTO> result))
+            {
+                result = await _appliedJobsService.GetAllJobsAppliedByMe(UserId);
+                var cacheExpiryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+                    Priority = CacheItemPriority.High,
+                    SlidingExpiration = TimeSpan.FromMinutes(2)
+                };
+                _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
+            }
+            return Ok(result);
         }
 
         [HttpPut]

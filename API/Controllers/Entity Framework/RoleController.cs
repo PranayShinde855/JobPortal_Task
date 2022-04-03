@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Services.Roles;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace API.Controllers.Roles
@@ -13,16 +17,33 @@ namespace API.Controllers.Roles
     public class RoleController : BaseController
     {
         private readonly IRoleService _roleService;
-        public RoleController(IRoleService roleService)
+
+        protected readonly IMemoryCache _memoryCache;
+        protected readonly DbContextModel _dbContext;
+        public RoleController(IRoleService roleService, IMemoryCache memoryCache, DbContextModel dbContext)
         {
             _roleService = roleService;
+            _memoryCache = memoryCache;
+            _dbContext = dbContext;
         }
 
         [HttpGet]
         [Route("Roles")]
         public async Task<IActionResult> GetRoles()
         {
-            return Ok(await _roleService.GetAll());
+            var cacheKey = "result";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Models.Roles> result))
+            {
+                result = await _roleService.GetAll();
+                var cacheExpiryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+                    Priority = CacheItemPriority.High,
+                    SlidingExpiration = TimeSpan.FromMinutes(2)
+                };
+                _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
+            }
+            return Ok(result);
         }
 
         [HttpGet]
