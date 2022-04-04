@@ -32,8 +32,12 @@ namespace ADOServices.ADOServices.RoleServices
 
         public async Task<bool> Delete(int id)
         {
-            string query = $"DELETE Roles WHERE Id = {id} ";
-            int info = await DB<Roles>.ExecuteData(query);
+            string query = $"DELETE Roles WHERE Id = @Id ";
+            var parameters = new IDataParameter[]
+           {
+                new SqlParameter("@Id", Convert.ToInt32(id))
+           };
+            int info = await DB<Roles>.ExecuteData(query, parameters);
             if (info > 0)
                 return true;
             return false;
@@ -49,15 +53,26 @@ namespace ADOServices.ADOServices.RoleServices
         public async Task<Roles> GetById(int id)
         {
             object obj = new object();
-            string query = $"SELECT * FROM Roles WHERE Id = {id}";
-            Roles role = await DB<Roles>.GetSingleRecord(query);
+            string query = $"SELECT * FROM Roles WHERE Id = @Id";
+            var parameters = new IDataParameter[]
+           {
+                new SqlParameter("@Id", Convert.ToInt32(id))
+           };
+            Roles role = await DB<Roles>.GetSingleRecord(query, parameters);
             return role;
         }
 
         public async Task<bool> Update(int id, string role, int userId, bool isActive)
         {
-            string query = $"UPDATE Roles SET Name = {role}, ModifiedDate = {DateTime.Now}, ModifiedBy = {userId}, IsActive = {isActive} WHERE Id = {id})";
-            var data = await DB<Roles>.ExecuteData(query);
+            string query = $"UPDATE Roles SET Name = @Role, ModifiedDate = @ModifiedDate, ModifiedBy = @UserId, IsActive = @IsActive WHERE Id = @Id)";
+            var parameters = new IDataParameter[]
+           {
+                new SqlParameter("@Role", Convert.ToString(role)),
+                new SqlParameter("@ModifiedDate", Convert.ToDateTime(DateTime.Now)),
+                new SqlParameter("@UserId", Convert.ToInt32(userId)),
+                new SqlParameter("@IsActive", Convert.ToBoolean(isActive))
+           };
+            var data = await DB<Roles>.ExecuteData(query, parameters);
             if (data > 0)
                 return true;
             return false;

@@ -109,8 +109,12 @@ namespace ADOServices.ADOServices.UserServices
 
         public async Task<bool> CheckEmailIdExist(string email)
         {
-            string query = "SELECT * FROM Users WHERE Email = '" + email + "' ";
-            Users obj = await DB<Users>.GetSingleRecord(query);
+            string query = "SELECT * FROM Users WHERE Email = @Email ";
+            var parameters = new IDataParameter[]
+           {
+                new SqlParameter("@Email", Convert.ToString(email))
+           };
+            Users obj = await DB<Users>.GetSingleRecord(query, parameters);
             if (obj != null)
                 return true;
             return false;
@@ -118,8 +122,12 @@ namespace ADOServices.ADOServices.UserServices
 
         public async Task<bool> Delete(int id)
         {
-            string query = "DELETE Users WHERE UserId = '" + id + "' ";
-            int info = await DB<Users>.ExecuteData(query);
+            string query = "DELETE Users WHERE UserId = @Id ";
+            var parameters = new IDataParameter[]
+           {
+                new SqlParameter("@Id", Convert.ToInt32(id))
+           };
+            int info = await DB<Users>.ExecuteData(query, parameters);
             if (info > 0)
                 return true;
             return false;
@@ -189,8 +197,12 @@ namespace ADOServices.ADOServices.UserServices
 
         public async Task<Users> GetById(int id)
         {
-            string query = "SELECT * FROM Users WHERE UserId = '" + id + "'";
-            Users obj = await DB<Users>.GetSingleRecord(query);
+            string query = "SELECT * FROM Users WHERE UserId = @Id";
+            var parameters = new IDataParameter[]
+           {
+                new SqlParameter("@Id", Convert.ToInt32(id))
+           };
+            Users obj = await DB<Users>.GetSingleRecord(query, parameters);
             return obj;
         }
 
@@ -203,15 +215,24 @@ namespace ADOServices.ADOServices.UserServices
 
         public async Task<Users> GetUser(string email)
         {
-            string query = "SELECT * FROM Users WHERE Email = '" + email + "' ";
-            Users obj = await DB<Users>.GetSingleRecord(query);
+            string query = "SELECT * FROM Users WHERE Email = @Email ";
+            var parameters = new IDataParameter[]
+           {
+                new SqlParameter("@Email", Convert.ToString(email))
+           };
+            Users obj = await DB<Users>.GetSingleRecord(query, parameters);
             return obj;
         }
 
         public async Task<bool> ResetPassword(ResetPasswordDTO dTO, int id)
         {
-            string query = "UPDATE Users SET Password = '"+ dTO.ConfirmPassword +"' WHERE UserId = '" + id + "'";
-            int obj = await DB<Users>.ExecuteData(query);
+            string query = "UPDATE Users SET Password = @Password WHERE UserId = @UserId";
+            var parameters = new IDataParameter[]
+           {
+               new SqlParameter("@Password", Convert.ToString(dTO.ConfirmPassword)),
+                new SqlParameter("@UserId", Convert.ToInt32(id))
+           };
+            int obj = await DB<Users>.ExecuteData(query, parameters);
             if (obj > 0)
                 return true;
             return false;

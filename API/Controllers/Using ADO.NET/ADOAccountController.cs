@@ -38,7 +38,6 @@ namespace API.Controllers.Using_ADO.NET
                 {
                     var info = await _userServices.AddAdmin(req);
                     if (info == true)
-                        //return Ok(true);
                         return Ok(new  SomeException ("Saved", req));
                 }
                 return NotFound(new SomeException("This email address is already taken." +
@@ -59,7 +58,7 @@ namespace API.Controllers.Using_ADO.NET
                 {
                     var info = await _userServices.AddRecruiter(req);
                     if (info == true)
-                        throw new SomeException("Saved", info);
+                        return Ok(new SomeException("Saved", info));
                 }
                 return NotFound(new SomeException("This email address is already taken." +
                     " Please use another eamil address.", req.Email));
@@ -79,7 +78,7 @@ namespace API.Controllers.Using_ADO.NET
                 {
                     var info = await _userServices.AddUser(req);
                     if (info == true)
-                        return Ok(true);
+                        return Ok(new SomeException("Saved", info));
                 }
                 return NotFound(new SomeException("This email address is already taken." +
                     " Please use another eamil address.", req.Email));

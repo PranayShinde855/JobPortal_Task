@@ -1,7 +1,9 @@
 ﻿using Database.ADO;
+using Microsoft.Data.SqlClient;
 using Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 
 namespace ADOServices.ADOServices.OTPServices
@@ -17,8 +19,14 @@ namespace ADOServices.ADOServices.OTPServices
             checkOtpExist = await OTPExists(otp);
             if (checkOtpExist == false)
             {
-                string query = $"INSERT INTO OTP VALUES({otp}, {userId})";
-                var obj = await DB<OTP>.ExecuteData(query);
+                string query = $"INSERT INTO OTP VALUES(@OTP, @UserId)";
+                var parameters = new IDataParameter[]
+                    {
+                        new SqlParameter("OTP", Convert.ToInt32(otp)),
+                        new SqlParameter("@UserId", Convert.ToInt32(userId))
+                    };
+          
+                var obj = await DB<OTP>.ExecuteData(query, parameters);
                 if (obj > 0)
                     return otp;
             }
@@ -34,15 +42,23 @@ namespace ADOServices.ADOServices.OTPServices
 
         public async Task<OTP> GetByOTP(int otp)
         {
-            string query = $"SELECT * FROM OTP WHERE otp = {otp}";
-            OTP obj = await DB<OTP>.GetSingleRecord(query);
+            string query = $"SELECT * FROM OTP WHERE otp = @OTP";
+            var parameters = new IDataParameter[]
+            {
+                new SqlParameter("@OTP", Convert.ToInt32(otp))
+            };
+            OTP obj = await DB<OTP>.GetSingleRecord(query, parameters);
             return obj;
         }
 
         public async Task<bool> OTPExists(int otp)
         {
-            string query = $"SELECT * FROM OTP WHERE otp = {otp}";
-            OTP obj = await DB<OTP>.GetSingleRecord(query);
+            string query = $"SELECT * FROM OTP WHERE otp = @OTP";
+            var parameters = new IDataParameter[]
+           {
+                new SqlParameter("@OTP", Convert.ToInt32(otp))
+           };
+            OTP obj = await DB<OTP>.GetSingleRecord(query, parameters);
             if (obj != null)
                 return true;
             return false;

@@ -56,8 +56,12 @@ namespace Services.ADOServices.Jobs
 
         public async Task<Job> GetById(int id)
         {
-            string query = $"SELECT * FROM Jobs WHERE Id = {id}";
-            Job obj = await DB<Job>.GetSingleRecord(query);
+            string query = "SELECT * FROM Jobs WHERE Id = @JobId";
+            var parameters = new IDataParameter[]
+          {
+                new SqlParameter("@JobId", Convert.ToInt32(id))
+          };
+            Job obj = await DB<Job>.GetSingleRecord(query, parameters);
             return obj;
         }
 

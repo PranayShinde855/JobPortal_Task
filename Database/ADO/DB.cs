@@ -58,6 +58,34 @@ namespace Database.ADO
             return rows;
         }
 
+        public async static Task<T> GetSingleRecord(string sql, IDataParameter[] parameters)
+        {
+            var tcs = new TaskCompletionSource<List<T>>();
+            DataSet ds = new DataSet();
+            using (SqlConnection con = new SqlConnection(source))
+            {
+                con.Open();
+                using (var cmd = new SqlCommand(sql, con))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    using (SqlDataAdapter da = new SqlDataAdapter())
+                    {
+                        da.SelectCommand = cmd;
+                        foreach (IDataParameter p in parameters)
+                        {
+                            cmd.Parameters.Add(p);
+                        }
+                        da.Fill(ds);
+                    }
+                    con.Close();
+                    string JSONString = string.Empty;
+                    JSONString = JsonConvert.SerializeObject(ds.Tables[0]);
+                    IEnumerable<T> list = await Task.Run(() => JsonConvert.DeserializeObject<IEnumerable<T>>(JSONString));
+                    return list.FirstOrDefault();
+                }
+            }
+        }
+
         public async static Task<T> GetSingleRecord(string sql)
         {
             var tcs = new TaskCompletionSource<List<T>>();
@@ -78,6 +106,34 @@ namespace Database.ADO
                     JSONString = JsonConvert.SerializeObject(ds.Tables[0]);
                     IEnumerable<T> list = await Task.Run(() => JsonConvert.DeserializeObject<IEnumerable<T>>(JSONString));
                     return list.FirstOrDefault();
+                }
+            }
+        }
+
+        public async static Task<IEnumerable<T>> GetList(string sql, IDataParameter[] parameters)
+        {
+            var tcs = new TaskCompletionSource<List<T>>();
+            DataSet ds = new DataSet();
+            using (SqlConnection con = new SqlConnection(source))
+            {
+                con.Open();
+                using (var cmd = new SqlCommand(sql, con))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    using (SqlDataAdapter da = new SqlDataAdapter())
+                    {
+                        da.SelectCommand = cmd;
+                        foreach (IDataParameter p in parameters)
+                        {
+                            cmd.Parameters.Add(p);
+                        }
+                        da.Fill(ds);
+                    }
+                    con.Close();
+                    string JSONString = string.Empty;
+                    JSONString = JsonConvert.SerializeObject(ds.Tables[0]);
+                    IEnumerable<T> list = await Task.Run(() => JsonConvert.DeserializeObject<IEnumerable<T>>(JSONString));
+                    return list;
                 }
             }
         }

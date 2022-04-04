@@ -65,7 +65,7 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpPost]
-        [Authorize(Policy = "User")]
+        [Authorize(Policy = "Recruiter")]
         [Route("Job")]
         public async Task<IActionResult> AddJob(JobDTO job)
             {
@@ -73,7 +73,7 @@ namespace API.Controllers.Using_ADO.NET
             {
                 var info = await _jobsServiceADO.Add(job, UserId);
                 if (info == true)
-                    return Ok(info);
+                    return Ok(new SomeException("Job added successfully.", info));
                 return BadRequest(new SomeException("An error occured.", info));
             }
             return BadRequest(ModelState);
@@ -112,9 +112,15 @@ namespace API.Controllers.Using_ADO.NET
         public async Task<IActionResult> ApplyJob(int jobId)
         {
             var checkJob = await _jobsServiceADO.GetById(jobId);
+            if(checkJob != null)
             {
-                var info = await _appliedJobsServicesADO.Add(jobId, UserId);
-                return Ok(info);
+                var checkAlreadApplied = await _appliedJobsServicesADO.AlreadyAppliedToJob(jobId, UserId);
+                if (checkAlreadApplied == false)
+                {
+                    var info = await _appliedJobsServicesADO.Add(jobId, UserId);
+                    return Ok(new SomeException("Applied to  job successfully", info));
+                }
+                return BadRequest(new SomeException($"Already applied to job {jobId}"));
             }
             return NotFound(new SomeException($"Job not found {jobId}"));
         }
@@ -168,8 +174,8 @@ namespace API.Controllers.Using_ADO.NET
             if (checkJob != null)
             {
                 var result = await _appliedJobsServicesADO.Delete(id);
-                if(result == true)
-                    return Ok();
+                if (result == true)
+                    return Ok(new SomeException("Job deleted successfully", result));
 
                 return BadRequest(new SomeException("An error occured.", result));
             }

@@ -1,8 +1,11 @@
 ﻿using ADOServices.ADOServices.UserServices;
 using Database.ADO;
+using Microsoft.Data.SqlClient;
 using Models;
 using Models.DTOs;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 
 namespace ADOServices.ADOServices.Jobs
@@ -17,8 +20,15 @@ namespace ADOServices.ADOServices.Jobs
 
         public async Task<bool> Add(int jobId, int userId)
         {
-            string query = $"INSERT INTO AppliedJobs VALUES ({jobId}, {userId})";
-            var data = await DB<AppliedJob>.ExecuteData(query);
+            string query = "INSERT INTO AppliedJobs VALUES (@JobId, @UserId, @AppliedDate, @IsActive)";
+            var parameters = new IDataParameter[]
+            {
+                new SqlParameter("@JobId", Convert.ToInt32(jobId)),
+                new SqlParameter("@UserId", Convert.ToInt32(userId)),
+                new SqlParameter("@AppliedDate", Convert.ToDateTime(DateTime.Now)),
+                new SqlParameter("@IsActive", Convert.ToBoolean(true))
+            };
+            var data = await DB<AppliedJob>.ExecuteData(query, parameters);
             if (data > 0)
             {
                 var email = await EmailDetails(jobId, userId);
@@ -32,8 +42,13 @@ namespace ADOServices.ADOServices.Jobs
 
         public async Task<bool> AlreadyAppliedToJob(int jobId, int userId)
         {
-            string query = $"SELECT * FROM AppliedJobs WHERE JobId = {jobId} AND AppliedBy = {userId}";
-            AppliedJob obj = await DB<AppliedJob>.GetSingleRecord(query);
+            string query = "SELECT * FROM AppliedJobs WHERE JobId = @JobId AND AppliedBy = @AppliedBy";
+            var parameters = new IDataParameter[]
+            {
+                new SqlParameter("@JobId", Convert.ToInt32(jobId)),
+                new SqlParameter("@AppliedBy", Convert.ToInt32(userId))
+            };
+            AppliedJob obj = await DB<AppliedJob>.GetSingleRecord(query, parameters);
             if (obj != null)
                 return true;
             return false;
@@ -41,8 +56,12 @@ namespace ADOServices.ADOServices.Jobs
 
         public async Task<bool> Delete(int id)
         {
-            string query = $"DELETE AppliedJobs WHERE Id = '"+ id +"' ";
-            int info = await DB<AppliedJob>.ExecuteData(query);
+            string query = $"DELETE AppliedJobs WHERE Id = @JobId ";
+            var parameters = new IDataParameter[]
+           {
+                new SqlParameter("@JobId", Convert.ToInt32(id))
+           };
+            int info = await DB<AppliedJob>.ExecuteData(query, parameters);
             if (info > 0)
                 return true;
             return false;
@@ -79,8 +98,13 @@ namespace ADOServices.ADOServices.Jobs
                             " FROM AppliedJobs aj LEFT JOIN Jobs j ON aj.JobId = j.Id " +
                             "LEFT JOIN Users us ON aj.AppliedBy = us.UserId " +
                             "LEFT JOIN Users ua ON j.CreatedBy = ua.UserId " +
-                            "WHERE j.CreatedBy = '" + userId + " '";
-            IEnumerable<AppliedJobDTO> obj = await DB<AppliedJobDTO>.GetList(query);
+                            "WHERE j.CreatedBy = @UserId ";
+
+                    var parameters = new IDataParameter[]
+                    {
+                        new SqlParameter("@UserId", Convert.ToInt32(userId))
+                    };
+            IEnumerable<AppliedJobDTO> obj = await DB<AppliedJobDTO>.GetList(query, parameters);
             return obj;
         }
 
@@ -92,21 +116,29 @@ namespace ADOServices.ADOServices.Jobs
                             " FROM AppliedJobs aj LEFT JOIN Jobs j ON aj.JobId = j.Id " +
                             "LEFT JOIN Users us ON aj.AppliedBy = us.UserId " +
                             "LEFT JOIN Users ua ON j.CreatedBy = ua.UserId " +
-                            "WHERE aj.AppliedBy = '" + userId + " '";
-            IEnumerable < AppliedJobDTO > obj = await DB<AppliedJobDTO>.GetList(query);
+                            "WHERE aj.AppliedBy = @UserId '";
+            var parameters = new IDataParameter[]
+          {
+                new SqlParameter("@UserId", Convert.ToInt32(userId))
+          };
+            IEnumerable < AppliedJobDTO > obj = await DB<AppliedJobDTO>.GetList(query, parameters);
             return obj;
         }
 
         public async Task<AppliedJob> GetById(int id)
         {
-            string query = $"SELECT * FROM AppliedJobs WHERE Id = {id}";
-            AppliedJob obj  = await DB<AppliedJob>.GetSingleRecord(query);
+            string query = "SELECT * FROM AppliedJobs WHERE Id = @JobId";
+            var parameters = new IDataParameter[]
+          {
+                new SqlParameter("@JobId", Convert.ToInt32(id))
+          };
+            AppliedJob obj  = await DB<AppliedJob>.GetSingleRecord(query, parameters);
             return obj;
         }
 
         public async Task<bool> SendMailToUser(EmailRequestDTO req)
         {
-            var sub = $"Sir/Mam {req.Applicant},\n You have successfully applied to job.";
+            var sub = $"Sir/Mam {req.Applicant}, You have successfully applied to job.";
             var body = "";
             body += "<h4 style='font-size:1.1em'>\nJob Details </h4>";
             body += $"<h4 style='font-size:1.1em'>\nTitle : {req.Title} </h4>";
@@ -121,7 +153,7 @@ namespace ADOServices.ADOServices.Jobs
 
         public async Task<bool> SendMailToRecruiter(EmailRequestDTO req)
         {
-            var sub = $"Sir/Mam {req.Recruiter},\n {req.Applicant} have successfully applied to job you poasted.";
+            var sub = $"Sir/Mam {req.Recruiter}, {req.Applicant} have successfully applied to job you poasted.";
             var body = "";
             body += "<h4 style='font-size:1.1em'>\nApplicant Details </h4>";
             body += $"<h4 style='font-size:1.1em'>\nName : {req.Applicant} </h4>";
