@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers.Using_ADO.NET
 {
-    [Route("api/[controller]")]
+    [Route("api/ADO/Roles")]
     [ApiController]
     [Authorize(Policy = "Admin")]
     public class ADORoleController : BaseController
@@ -31,7 +31,7 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpGet]
-        [Route("Roles")]
+        //[Route("Roles")]
         public async Task<IActionResult> GetRoles()
         {
             var cacheKey = "result";
@@ -50,7 +50,7 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpGet]
-        [Route("Roles/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> RoleById(int id)
         {
             var result = await _roleServices.GetById(id);
@@ -61,7 +61,7 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpPost]
-        [Route("Roles")]
+        //[Route("Roles")]
         public async Task<IActionResult> AddRole(string role)
         {
             if (role != null)
@@ -75,7 +75,7 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpPut]
-        [Route("Roles/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> UpdateRole(int id, string role, bool isActive)
         {
             if (role != null)
@@ -83,16 +83,13 @@ namespace API.Controllers.Using_ADO.NET
                 var result = await _roleServices.Update(id, role, UserId, isActive);
                 if (result == true)
                     return Ok(new SomeException($"Updated successfully {role}"));
-                return Ok(new SomeException()
-                {
-                    //Data = { result }
-                });
+                return BadRequest(new SomeException("An error occured", result));
             }
             return BadRequest("Please fill the details.");
         }
 
         [HttpDelete]
-        [Route("Roles/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> DeleteRole(int id)
         {
             var checkId = await _roleServices.GetById(id);

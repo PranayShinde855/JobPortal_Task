@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers.Users
 {
-    [Route("api/[controller]")]
+    [Route("api/Users")]
     [EnableCors("AllowOrigin")]
     [ApiController]
     public class ApplicationUserController : BaseController
@@ -29,7 +29,7 @@ namespace API.Controllers.Users
 
         [HttpGet]
         [Authorize(Policy ="Admin")]
-        [Route("Users")]
+        //[Route("Users")]
         public async Task<IActionResult> Get()
         {
             var cacheKey = "result";
@@ -49,7 +49,7 @@ namespace API.Controllers.Users
 
         [HttpGet]
         [Authorize(Policy ="Admin")]
-        [Route("Users/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _userSerivce.GetById(id);
@@ -62,7 +62,7 @@ namespace API.Controllers.Users
 
         [HttpPut]
         [Authorize(Policy ="AllAllowed")]
-        [Route("Users/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> Update(UserRegistrationDTO req)
         {
             var result = await _userSerivce.Update(UserId, req);
@@ -74,7 +74,7 @@ namespace API.Controllers.Users
 
         [HttpDelete]
         [Authorize(Policy ="Admin")]
-        [Route("Users/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _userSerivce.Delete(id);

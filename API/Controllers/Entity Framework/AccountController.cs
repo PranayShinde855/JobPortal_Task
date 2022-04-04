@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Account")]
     [EnableCors("AllowOrigin")]
     [ApiController]
     public class AccountController : BaseController
@@ -36,7 +36,7 @@ namespace API.Controllers
 
         [HttpPost]
         [Authorize(Policy ="Admin")]
-        [Route("Registration/Admin")]
+        [Route("Admin")]
         public async Task<IActionResult> AdminRegistration(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)
@@ -56,7 +56,7 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("Registration/User")]
+        [Route("User")]
         public async Task<IActionResult> UserRegistration(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)
@@ -75,7 +75,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        [Route("Registration/Recruiter")]
+        [Route("Recruiter")]
         public async Task<IActionResult> AddRecruiter(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)

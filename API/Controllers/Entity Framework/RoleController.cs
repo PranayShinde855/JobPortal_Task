@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers.Roles
 {
-    [Route("api/[controller]")]
+    [Route("api/Roles")]
     [EnableCors("AllowOrigin")]
     [ApiController]
     [Authorize(Policy ="Admin")]
@@ -28,7 +28,7 @@ namespace API.Controllers.Roles
         }
 
         [HttpGet]
-        [Route("Roles")]
+        //[Route("Roles")]
         public async Task<IActionResult> GetRoles()
         {
             var cacheKey = "result";
@@ -47,14 +47,14 @@ namespace API.Controllers.Roles
         }
 
         [HttpGet]
-        [Route("Roles/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> GetRoleById(int id)
         {
             return Ok(await _roleService.GetById(id));
         }
 
         [HttpPost]
-        [Route("Roles")]
+        //[Route("Roles")]
         public async Task<IActionResult> AddRole(string role)
         {
             if(ModelState.IsValid)
@@ -64,14 +64,14 @@ namespace API.Controllers.Roles
         }
 
         [HttpPut]
-        [Route("Roles/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> UpdateRole(int id, string role, bool isActive)
         {
             return Ok(await _roleService.Update(id, role, UserId, isActive));
         }
 
         [HttpDelete]
-        [Route("Roles/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> DeleteRole(int id)
         {
             return Ok( await _roleService.Delete(id));

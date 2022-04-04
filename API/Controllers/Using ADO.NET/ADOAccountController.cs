@@ -1,6 +1,7 @@
 ﻿using ADOServices.ADOServices.OTPServices;
 using ADOServices.ADOServices.UserServices;
 using GlobalExceptionHandling.WebApi;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Models.DTOs;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers.Using_ADO.NET
 {
-    [Route("api/[controller]")]
+    [Route("api/ADO/Account")]
     [ApiController]
     public class ADOAccountController : ControllerBase
     {
@@ -27,8 +28,8 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpPost]
-        //[Authorize(Policy = "Admin")]
-        [Route("Registration/Admin")]
+        [Authorize(Policy = "Admin")]
+        [Route("Admin")]
         public async Task<IActionResult> AdminRegistration(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)
@@ -47,8 +48,8 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpPost]
-        //[AllowAnonymous]
-        [Route("Registration/Recruiter")]
+        [AllowAnonymous]
+        [Route("Recruiter")]
         public async Task<IActionResult> RecruiterRegistration(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)
@@ -67,8 +68,8 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpPost]
-        //[AllowAnonymous]
-        [Route("Registration/User")]
+        [AllowAnonymous]
+        [Route("User")]
         public async Task<IActionResult> UserRegistration(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)
@@ -86,8 +87,8 @@ namespace API.Controllers.Using_ADO.NET
             return BadRequest(new SomeException("Please fill all the details.", ModelState));
         }
 
-        //[AllowAnonymous]
         [HttpPost]
+        [AllowAnonymous]
         [Route("Login")]
         public async Task<IActionResult> Login(string email, string password)
         {
@@ -111,8 +112,8 @@ namespace API.Controllers.Using_ADO.NET
             return BadRequest(new SomeException("Please enter UserName and Password.", ModelState));
         }
 
-        //[AllowAnonymous]
         [HttpPost]
+        [AllowAnonymous]
         [Route("ForgotPassword")]
         public async Task<IActionResult> ForgotPassword(string email)
         {
@@ -128,8 +129,8 @@ namespace API.Controllers.Using_ADO.NET
             return BadRequest(new SomeException("Email does not exist.", email));
         }
 
-        //[AllowAnonymous]
         [HttpPost]
+        [AllowAnonymous]
         [Route("ResetPassword")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDTO dto)
         {

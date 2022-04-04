@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers.Using_ADO.NET
 {
-    [Route("api/[controller]")]
+    [Route("api/ADO/Jobs")]
     [ApiController]
     public class ADOJobsController : BaseController
     {
@@ -33,8 +33,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpGet]
         [Authorize(Policy = "AllAllowed")]
-        [AllowAnonymous]
-        [Route("Jobs")]
+        //[Route("Jobs")]
         public async Task<ActionResult> GetAllJobs()
         {
             var cacheKey = "result";
@@ -55,7 +54,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpGet]
         [Authorize(Policy = "AllAllowed")]
-        [Route("Jobs/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> GetJobById(int id)
         {
             var info = await _jobsServiceADO.GetById(id);
@@ -66,7 +65,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpPost]
         [Authorize(Policy = "Recruiter")]
-        [Route("Job")]
+        //[Route("Jobs")]
         public async Task<IActionResult> AddJob(JobDTO job)
             {
             if (ModelState.IsValid)
@@ -81,7 +80,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpPut]
         [Authorize(Policy = "Recruiter")]
-        [Route("Jobs/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> UpdateJobById(JobDTO job, int id)
         {
             var checkId = await _jobsServiceADO.GetById(id);
@@ -97,7 +96,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpDelete]
         [Authorize(Policy = "Recruiter")]
-        [Route("Jobs/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> DeleteJob(int id)
         {
             var info = await _jobsServiceADO.Delete(id);
@@ -108,7 +107,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpPost]
         [Authorize(Policy = "User")]
-        [Route("Jobs/Apply")]
+        [Route("AppliedJobs")]
         public async Task<IActionResult> ApplyJob(int jobId)
         {
             var checkJob = await _jobsServiceADO.GetById(jobId);
@@ -126,8 +125,8 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpGet]
-        [Route("AppliedJobs/Recruiter")]
         [Authorize(Policy = "Recruiter")]
+        [Route("AppliedJobs")]
         public async Task<IActionResult> GetAllApplicantAppliedToMyJobs()
         {
             var cacheKey = "result";
@@ -147,7 +146,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [Authorize(Policy = "User")]
         [HttpGet]
-        [Route("AppliedJobs/Applicant")]
+        [Route("Applicants/AppliedJobs")]
         public async Task<IActionResult> GetAllJobsAppliedByMe()
         {
             var cacheKey = "result";
@@ -167,7 +166,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpDelete]
         [Authorize(Policy = "User")]
-        [Route("AppliedJobs/Applicant/{id}")]
+        [Route("AppliedJobs/{id}")]
         public async Task<IActionResult> DeleteAppliedJob(int id)
         {
             var checkJob = await _appliedJobsServicesADO.GetById(id);

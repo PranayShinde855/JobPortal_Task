@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers.Using_ADO.NET
 {
-    [Route("api/[controller]")]
+    [Route("api/ADO/Users")]
     [EnableCors("AllowOrigin")]
     [ApiController]
     public class ADOApplicantionUserController : BaseController
@@ -34,7 +34,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpGet]
         [Authorize(Policy = "Admin")]
-        [Route("Users")]
+        //[Route("Users")]
         public async Task<IActionResult> Get()
         {
             var cacheKey = "result";
@@ -54,7 +54,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpGet]
         [Authorize(Policy = "Admin")]
-        [Route("Users/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _userServices.GetById(id);
@@ -66,7 +66,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpPut]
         [Authorize(Policy = "AllAllowed")]
-        [Route("Users/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> Update(int id, UserRegistrationDTO user)
         {
             if (ModelState.IsValid)
@@ -87,7 +87,7 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpDelete]
         [Authorize(Policy = "Admin")]
-        [Route("Users/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var checkUser = await _userServices.GetById(id);
