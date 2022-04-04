@@ -89,7 +89,7 @@ namespace API.Controllers.Using_ADO.NET
             {
                 var info = await _jobsServiceADO.Update(job, UserId, id);
                 if (info == true)
-                    return Ok(info);
+                    return Ok(new SomeException("Job updated successfully.", info));
                 return BadRequest(new SomeException("An error occured.", info));
             }
             return NotFound(new SomeException($"Job not found {id}"));
