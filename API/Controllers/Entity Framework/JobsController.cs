@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers.Jobs
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [EnableCors("AllowOrigin")]
     [ApiController]
     public class JobsController : BaseController
@@ -60,21 +60,20 @@ namespace API.Controllers.Jobs
         {
             Job info = await _jobService.GetById(id);
             if (info == null)
-                return NotFound();
-
-            return Ok(info);
+                return Ok(info);
+            return NotFound(new SomeException("Job not found.", id));
         }
 
         [HttpPost]
         [Authorize(Policy = "Recruiter")]
-        //[Route("Job")]
+        [Route("Job")]
         public async Task<IActionResult> AddJob(JobDTO job)
         {
             if (ModelState.IsValid)
             {
                 var info = await _jobService.Add(job, UserId);
                 if (info != null)
-                    return Ok(info);
+                    return Ok(new SomeException("Job added successfully.", info));
                 return BadRequest(new SomeException("An error occured.", info));
             }
             return BadRequest(ModelState);
@@ -87,7 +86,7 @@ namespace API.Controllers.Jobs
         {
             var info = await _jobService.Update(job, UserId, id);
             if (info == null)
-                return Ok(info);
+                return Ok(new SomeException("Job updated successfully.", info));
             return NotFound(new SomeException($"Job not found {id}."));
         }
 
@@ -98,7 +97,7 @@ namespace API.Controllers.Jobs
         {
             var info = await _jobService.Delete(id);
             if (info != null)
-                return Ok(info);
+                return Ok(new SomeException("Job deleted successfully.", info));
             return NotFound(new SomeException($"Job not found {id}."));
         }
 
@@ -129,7 +128,7 @@ namespace API.Controllers.Jobs
 
         [HttpGet]
         [Authorize(Policy = "Recruiter")]
-        [Route("AppliedJobs/Recruiter")]        
+        [Route("Recruiters/AppliedJobs/Users")]        
         public async Task<IActionResult> GetAllApplicantAppliedToMyJobs()
         {
             var cacheKey = "result";
@@ -149,7 +148,7 @@ namespace API.Controllers.Jobs
 
         [HttpGet]
         [Authorize(Policy = "User")]
-        [Route("AppliedJobs/Applicant")]
+        [Route("Applicants/AppliedJobs")]
         public async Task<IActionResult> GetAllJobsAppliedByMe()
         {
             var cacheKey = "result";
@@ -174,7 +173,7 @@ namespace API.Controllers.Jobs
         {
             var result = await _appliedJobsService.Delete(id);
             if (result != null)
-                return Ok(result);
+                return Ok(new SomeException("Job deleted successfully.", result));
 
             return NotFound(new SomeException($"Job not found {id}."));
         }
