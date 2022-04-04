@@ -66,15 +66,18 @@ namespace API.Controllers.Jobs
         }
 
         [HttpPost]
-        [Authorize(Policy ="Recruiter")]
-        [Route("Job")]
+        [Authorize(Policy = "Recruiter")]
+        //[Route("Job")]
         public async Task<IActionResult> AddJob(JobDTO job)
         {
-            var info = await _jobService.Add(job, UserId);
-            if (info == null)
-                return NotFound();
-
-            return Ok(info);
+            if (ModelState.IsValid)
+            {
+                var info = await _jobService.Add(job, UserId);
+                if (info != null)
+                    return Ok(info);
+                return BadRequest(new SomeException("An error occured.", info));
+            }
+            return BadRequest(ModelState);
         }
 
         [HttpPut]
