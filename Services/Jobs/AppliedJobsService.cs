@@ -13,7 +13,7 @@ namespace Services.Jobs
     public class AppliedJobsService : IAppliedJobsService
     {
         private readonly IAppliedJobsRepository _appliedJobsRepository;
-        protected readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
         private readonly IJobService _jobService;
         private readonly IUserService _userService;
         public AppliedJobsService(IAppliedJobsRepository jobsRepository, IConfiguration configuration,
@@ -42,11 +42,9 @@ namespace Services.Jobs
             return obj;
         }
 
-        public async Task<AppliedJob> Delete(int id)
+        public async Task<AppliedJob> Delete(AppliedJob job)
         {
-            AppliedJob getJob = await _appliedJobsRepository.GetById(id);
-            await _appliedJobsRepository.Delete(getJob);
-            return getJob;
+            return await _appliedJobsRepository.Delete(job);
         }
 
         public async Task<IQueryable<AppliedJob>> GetAll()

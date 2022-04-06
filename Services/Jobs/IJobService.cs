@@ -11,6 +11,7 @@ namespace Services.Jobs
         Task<Job> Update(JobDTO job, int userId, int id);
         Task<Job> Delete(int id);
         Task<Job> GetById(int id);
+        Task<Job> CheckJobByUserIdAndJobId(int id, int userId);
         Task<IQueryable<Job>> GetAll();
     }
 }

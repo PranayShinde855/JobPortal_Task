@@ -22,8 +22,8 @@ namespace ADOServices.ADOServices.UserServices
 {
     public class UserServices : IUserServices
     {
-        public readonly IConfiguration _configuration;
-        public readonly IOTPServices _oTPServices;
+        private readonly IConfiguration _configuration;
+        private readonly IOTPServices _oTPServices;
         public UserServices(IConfiguration configuration, IOTPServices oTPServices)
         {
             _configuration = configuration;

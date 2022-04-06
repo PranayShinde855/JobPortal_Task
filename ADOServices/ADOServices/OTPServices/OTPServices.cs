@@ -40,12 +40,13 @@ namespace ADOServices.ADOServices.OTPServices
             return obj;
         }
 
-        public async Task<OTP> GetByOTP(int otp)
+        public async Task<OTP> GetByOTP(int otp, int userId)
         {
-            string query = $"SELECT * FROM OTP WHERE otp = @OTP";
+            string query = $"SELECT * FROM OTP WHERE otp = @OTP AND UserId = @UserId";
             var parameters = new IDataParameter[]
             {
-                new SqlParameter("@OTP", Convert.ToInt32(otp))
+                new SqlParameter("@OTP", Convert.ToInt32(otp)),
+                new SqlParameter("@UserId", Convert.ToInt32(userId))
             };
             OTP obj = await DB<OTP>.GetSingleRecord(query, parameters);
             return obj;

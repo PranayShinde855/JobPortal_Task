@@ -11,7 +11,7 @@ namespace Services.UserServices
         Task<Users> AddRecruiter(UserRegistrationDTO req, int userId);
         Task<Users> AddAdmin(UserRegistrationDTO req, int userId);
         Task<Users> Update(int Id, UserRegistrationDTO req);
-        Task<bool> Delete(int Id);
+        Task<bool> Delete(Users users);
         Task<Users> GetById(int Id);
         Task<IQueryable<Users>> GetAll();
         Task<Users> GetUser(string email, string password);

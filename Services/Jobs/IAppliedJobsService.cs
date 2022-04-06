@@ -11,7 +11,7 @@ namespace Services.Jobs
         Task<AppliedJob> Add(int jobId, int userId);
         Task<bool> SendMailToUser(Users user, Job job);
         Task<bool> SendMailToRecruiter(Users user, Job job);
-        Task<AppliedJob> Delete(int id);
+        Task<AppliedJob> Delete(AppliedJob job);
         Task<AppliedJob> GetById(int id);
         Task<IQueryable<AppliedJob>> GetAll();
         Task<IEnumerable<AppliedJobDTO>> GetAllApplicantAppliedToMyJobs(int userId);

@@ -12,7 +12,7 @@ namespace ADOServices.ADOServices.Jobs
 {
     public class AppliedJobsServices : IAppliedJobsServices
     {
-        public readonly IUserServices _userServices;
+        private readonly IUserServices _userServices;
         public AppliedJobsServices(IUserServices userServices)
         {
             _userServices = userServices;
@@ -73,7 +73,12 @@ namespace ADOServices.ADOServices.Jobs
                             " ua.Email AS ApplicantEmail, ua.Address AS Address, j.Title AS Title, j.Description AS Description," +
                             " j.skills AS Skills, j.Location AS Location FROM AppliedJobs aj LEFT JOIN Users ua ON aj.AppliedBy = ua.UserId" +
                             " LEFT JOIN Jobs j ON aj.JobId = j.Id LEFT JOIN Users ur ON j.CreatedBy = ur.UserId " +
-                            "WHERE aj.AppliedBy = '"+ applicantId +"' AND j.Id = '"+ jobId +"'";
+                            "WHERE aj.AppliedBy = @ApplicantId AND j.Id = @JobId";
+            var parameters = new IDataParameter[]
+            {
+                new SqlParameter("@ApplicantId", applicantId),
+                new SqlParameter("@JobId", jobId)
+            };
             EmailRequestDTO obj = await DB<EmailRequestDTO>.GetSingleRecord(query);
             return obj;
         }

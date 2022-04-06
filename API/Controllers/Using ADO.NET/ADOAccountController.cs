@@ -2,7 +2,6 @@
 using ADOServices.ADOServices.UserServices;
 using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Models.DTOs;
@@ -12,7 +11,6 @@ using System.Threading.Tasks;
 namespace API.Controllers.Using_ADO.NET
 {
     [Route("api/ADO/Account")]
-    //[EnableCors("AllowOrigin")]
     [ApiController]
     public class ADOAccountController : BaseController
     {
@@ -41,7 +39,9 @@ namespace API.Controllers.Using_ADO.NET
                 {
                     var info = await _userServices.AddAdmin(req, UserId);
                     if (info == true)
-                        return Ok(new  SomeException ("Saved", req));
+                            return Ok(new SomeException("Saved", info));
+
+                    return BadRequest(new SomeException("An error occured."));
                 }
                 return NotFound(new SomeException("This email address is already taken." +
                     " Please use another eamil address.", req.Email));
@@ -61,7 +61,9 @@ namespace API.Controllers.Using_ADO.NET
                 {
                     var info = await _userServices.AddRecruiter(req, UserId);
                     if (info == true)
-                        return Ok(new SomeException("Saved", info));
+                            return Ok(new SomeException("Saved", info));
+
+                    return BadRequest(new SomeException("An error occured."));
                 }
                 return NotFound(new SomeException("This email address is already taken." +
                     " Please use another eamil address.", req.Email));
@@ -81,7 +83,9 @@ namespace API.Controllers.Using_ADO.NET
                 {
                     var info = await _userServices.AddUser(req);
                     if (info == true)
-                        return Ok(new SomeException("Saved", info));
+                            return Ok(new SomeException("Saved", info));
+
+                    return BadRequest(new SomeException("An error occured."));
                 }
                 return NotFound(new SomeException("This email address is already taken." +
                     " Please use another eamil address.", req.Email));
@@ -141,7 +145,7 @@ namespace API.Controllers.Using_ADO.NET
                 var checkEmail = await _userServices.GetUser(req.Email);
                 if (checkEmail != null)
                 {
-                    var getUser = await _oTPServices.GetByOTP(req.OTP);
+                    var getUser = await _oTPServices.GetByOTP(req.OTP, checkEmail.UserId);
                     if (getUser != null)
                     {
                         var result = await _userServices.ResetPassword(req, getUser.UserId);
@@ -150,12 +154,10 @@ namespace API.Controllers.Using_ADO.NET
 
                         return BadRequest(new SomeException("An error occured.", result));
                     }
-                    return NotFound(new SomeException("Invalid OTP.", getUser));
+                    return NotFound(new SomeException("Invalid OTP OR Email.", getUser));
                 }
                 return BadRequest(new SomeException($"{req.Email} does not exist."));
-
             }
-
             return BadRequest(new SomeException("Password and Confirm Password should be same."));
         }
     }

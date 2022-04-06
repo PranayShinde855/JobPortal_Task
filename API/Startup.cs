@@ -72,9 +72,9 @@ namespace API
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Recruiter", policy => policy.RequireRole("Admin", "Recruiter"));
+                options.AddPolicy("Recruiter", policy => policy.RequireRole("Recruiter", "Admin"));
                 options.AddPolicy("AllAllowed", policy => policy.RequireRole("Admin", "Recruiter", "User"));
-                options.AddPolicy("User", policy => policy.RequireRole("Admin", "User"));
+                options.AddPolicy("User", policy => policy.RequireRole("User", "Admin"));
                 options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
             });
 

@@ -4,7 +4,7 @@ namespace Models.DTOs
 {
     public class ResetPasswordDTO
     {
-        [Required(ErrorMessage ="Please enter email")]
+        [RegularExpression(@"^[a-z0-9A-Z!#$%^&&*/?_`~]+@[a-z0-9A-Z!#$%^&&*/?_`~]+([a-zA-Z].{2,})$", ErrorMessage = "Please enter email.")]
         [MaxLength(50)]
         public string Email { get; set; }
 
@@ -12,14 +12,12 @@ namespace Models.DTOs
         [MaxLength(4)]
         public int OTP { get; set; }
 
-        [Required(ErrorMessage = "Please enter password")]
-        [DataType(DataType.Password)]
-        [MaxLength(50)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.\d)(?=.[!@#$%+-_&*])", ErrorMessage = "Please enter password.")]
+        [MaxLength(8)]
         public string Password { get; set; }
 
-        [DataType(DataType.Password)]
-        [Required(ErrorMessage = "Please enter confirm password")]
-        [MaxLength(50)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.\d)(?=.[!@#$%+-_&*])", ErrorMessage = "Please enter password.")]
+        [MaxLength(8)]
         public string ConfirmPassword { get; set; }
     }
 }

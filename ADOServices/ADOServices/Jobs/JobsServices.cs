@@ -20,7 +20,7 @@ namespace Services.ADOServices.Jobs
 
             var parameters = new IDataParameter[]
             {
-                 new SqlParameter("@Title", Convert.ToString(job.Title)),
+                new SqlParameter("@Title", Convert.ToString(job.Title)),
                 new SqlParameter("@Description", Convert.ToString(job.Description)),
                 new SqlParameter("@skills", Convert.ToString(job.Skills)),
                 new SqlParameter("@Location", Convert.ToString(job.Location)),
@@ -38,10 +38,14 @@ namespace Services.ADOServices.Jobs
             return false;
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(int jobId)
         {
-            string query = $"select * from Jobs where Id = {id}";
-            var result =  await DB<Job>.ExecuteData(query);
+            string query = "select * from Jobs where Id = @JobId";
+            var parameters = new IDataParameter[]
+            {
+                new SqlParameter("@JobId", Convert.ToInt32(jobId))
+            };
+            var result =  await DB<Job>.ExecuteData(query, parameters);
             if(result > 0 )
                 return true;
             return false;
@@ -68,7 +72,7 @@ namespace Services.ADOServices.Jobs
         public async Task<bool> Update(JobDTO job, int userId, int id)
         {
             string query = "Update Jobs Set Title = @Title, Description = @Description, skills = @skills, Location = @Location, ModifiedDate = @ModifiedDate" +
-                ",ModifiedBy = @ModifiedBy, IsActive = @IsActive WHERE Id = '"+ id +"' ";
+                ", ModifiedBy = @ModifiedBy, IsActive = @IsActive WHERE Id = @JobId ";
             var parameters = new IDataParameter[]
             {
                 new SqlParameter("@Title", Convert.ToString(job.Title)),
@@ -77,7 +81,8 @@ namespace Services.ADOServices.Jobs
                 new SqlParameter("@Location", Convert.ToString(job.Location)),
                 new SqlParameter("@ModifiedDate", Convert.ToDateTime(DateTime.Now)),
                 new SqlParameter("@ModifiedBy", Convert.ToInt32(userId)),
-                new SqlParameter("@IsActive", Convert.ToBoolean(job.IsActive))
+                new SqlParameter("@IsActive", Convert.ToBoolean(job.IsActive)),
+                new SqlParameter("@JobId", Convert.ToInt32(id))
            };
             var data = await DB<Job>.ExecuteData(query, parameters);
             if (data > 0)

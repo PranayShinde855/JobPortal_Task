@@ -11,14 +11,13 @@ namespace Models
         public int UserId { get; set; }
         [Required(ErrorMessage ="Please enter user name.")]
         public string UserName { get; set; }
+        [Required(ErrorMessage = "Please enter address.")]
         public string Address { get; set; }
 
-        [Required(ErrorMessage = "Please enter email.")]
-        [RegularExpression(@"^[a-z0-9A-Z!#$%^&&*/?_`~]+@[a-z0-9A-Z!#$%^&&*/?_`~]+([a-zA-Z]{2,})")]
+        [RegularExpression(@"^[a-z0-9A-Z!#$%^&&*/?_`~]+@[a-z0-9A-Z!#$%^&&*/?_`~]+([a-zA-Z].{2,})$", ErrorMessage = "Please enter email.")]
         public string Email { get; set; }
 
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.\d)(?=.[!@#$%+-_&*])", ErrorMessage = "Please enter password.")]
-        [DataType(DataType.Password)]
         public string Password { get; set; }
         public int RoleId { get; set; }
         public int CreatedBy { get; set; }

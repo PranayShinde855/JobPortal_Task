@@ -2,7 +2,6 @@
 using Database;
 using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -14,7 +13,6 @@ using System.Threading.Tasks;
 namespace API.Controllers.Using_ADO.NET
 {
     [Route("api/ADO/Jobs")]
-    //[EnableCors("AllowOrigin")]
     [ApiController]
     public class ADOJobsController : BaseController
     {
@@ -35,7 +33,6 @@ namespace API.Controllers.Using_ADO.NET
 
         [HttpGet]
         [Authorize(Policy = "AllAllowed")]
-        //[Route("Jobs")]
         public async Task<ActionResult> GetAllJobs()
         {
             var cacheKey = "result";
@@ -62,19 +59,20 @@ namespace API.Controllers.Using_ADO.NET
             var info = await _jobsServiceADO.GetById(id);
             if (info != null)
                 return Ok(info);
+
             return NotFound(new SomeException($"Job not found {id}"));
         }
 
         [HttpPost]
         [Authorize(Policy = "Recruiter")]
-        //[Route("Jobs")]
         public async Task<IActionResult> AddJob(JobDTO job)
-            {
+        {
             if (ModelState.IsValid)
             {
                 var info = await _jobsServiceADO.Add(job, UserId);
                 if (info == true)
                     return Ok(new SomeException("Job added successfully.", info));
+
                 return BadRequest(new SomeException("An error occured.", info));
             }
             return BadRequest(ModelState);
@@ -85,15 +83,20 @@ namespace API.Controllers.Using_ADO.NET
         [Route("{id}")]
         public async Task<IActionResult> UpdateJobById(JobDTO job, int id)
         {
-            var checkId = await _jobsServiceADO.GetById(id);
-            if (checkId != null)
+            if (ModelState.IsValid)
             {
-                var info = await _jobsServiceADO.Update(job, UserId, id);
-                if (info == true)
-                    return Ok(new SomeException("Job updated successfully.", info));
-                return BadRequest(new SomeException("An error occured.", info));
+                var checkId = await _jobsServiceADO.GetById(id);
+                if (checkId != null)
+                {
+                    var info = await _jobsServiceADO.Update(job, UserId, id);
+                    if (info == true)
+                        return Ok(new SomeException("Job updated successfully.", info));
+
+                    return BadRequest(new SomeException("An error occured.", info));
+                }
+                return NotFound(new SomeException($"Job not found {id}"));
             }
-            return NotFound(new SomeException($"Job not found {id}"));
+            return BadRequest(ModelState);
         }
 
         [HttpDelete]
@@ -101,9 +104,15 @@ namespace API.Controllers.Using_ADO.NET
         [Route("{id}")]
         public async Task<IActionResult> DeleteJob(int id)
         {
-            var info = await _jobsServiceADO.Delete(id);
-            if (info == true)
-                return Ok(info);
+            var checkJob = await _jobsServiceADO.GetById(id);
+            if(checkJob != null)
+            {
+                var info = await _jobsServiceADO.Delete(id);
+                if (info == true)
+                    return Ok(new SomeException("Job deleted sucessfully.", info));
+
+                return BadRequest("An error occured");
+            }
             return NotFound(new SomeException($"Job not found {id}"));
         }
 

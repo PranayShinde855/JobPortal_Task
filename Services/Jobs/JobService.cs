@@ -31,6 +31,11 @@ namespace Services.Jobs
             return info;
         }
 
+        public async Task<Job> CheckJobByUserIdAndJobId(int id, int userId)
+        {
+            return await _jobsRepository.GetDefault(x => x.CreatedBy == userId && x.Id == id);
+        }
+
         public async Task<Job> Delete(int id)
         {
             var getUser = await _jobsRepository.GetById(id);

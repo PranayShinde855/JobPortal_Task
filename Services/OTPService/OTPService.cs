@@ -18,9 +18,9 @@ namespace Services.OTPService
             throw new System.NotImplementedException();
         }
 
-        public async Task<OTP> GetByOTP(int otp)
+        public async Task<OTP> GetByOTP(int otp, int userId)
         {
-            return await _oTPRepository.GetDefault(x=>x.Otp == otp);
+            return await _oTPRepository.GetDefault(x=>x.Otp == otp && x.UserId == userId);
         }
 
         public async Task<int> GenerateOTP(int userId)

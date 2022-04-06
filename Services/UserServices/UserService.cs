@@ -19,10 +19,10 @@ namespace Services.UserServices
 {
     public class UserService : IUserService
     {
-        protected readonly IUserRepository _userRepository;
-        protected readonly IConfiguration _configuration;
-        protected readonly IOTPService _oTPService;
-        protected readonly IRoleService _roleService; 
+        private readonly IUserRepository _userRepository;
+        private readonly IConfiguration _configuration;
+        private readonly IOTPService _oTPService;
+        private readonly IRoleService _roleService; 
         public UserService(IUserRepository userRepositor, IConfiguration configuration, 
              IRoleService roleService)
         {
@@ -78,14 +78,12 @@ namespace Services.UserServices
             }
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(Users users)
         {
-            var getdata = await _userRepository.GetById(id);
-            if(getdata != null)
-            {
-                await _userRepository.Delete(getdata);
+            var info = await _userRepository.Delete(users);
+            if (info != null)
                 return true;
-            }
+
             return false;
         }
 

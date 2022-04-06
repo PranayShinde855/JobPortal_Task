@@ -2,7 +2,6 @@
 using Database;
 using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -14,7 +13,6 @@ using System.Threading.Tasks;
 namespace API.Controllers.Using_ADO.NET
 {
     [Route("api/ADO/Users")]
-    //[EnableCors("AllowOrigin")]
     [ApiController]
     public class ADOApplicantionUserController : BaseController
     {
@@ -71,10 +69,10 @@ namespace API.Controllers.Using_ADO.NET
             if (ModelState.IsValid)
             {
                 var result = await _userServices.Update(UserId, user);
-                if (result == false)
-                    return BadRequest(new SomeException("An error occured.", result));
+                if (result == true)
+                    return Ok(new SomeException("Updated successfully.", result));
 
-                return Ok(new SomeException("Updated successfully.", result));
+                return BadRequest(new SomeException("An error occured.", result));
             }
             return BadRequest(ModelState);
         }

@@ -1,7 +1,6 @@
 ﻿using Database;
 using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Models;
@@ -15,7 +14,6 @@ using System.Threading.Tasks;
 namespace API.Controllers.Jobs
 {
     [Route("api/Jobs")]
-    //[EnableCors("AllowOrigin")]
     [ApiController]
     public class JobsController : BaseController
     {
@@ -35,7 +33,6 @@ namespace API.Controllers.Jobs
 
         [HttpGet]
         [Authorize(Policy ="AllAllowed")]
-        //[Route("Jobs")]
         public async Task<IActionResult> GetAllJobs()
         {
             var cacheKey = "result";
@@ -66,7 +63,6 @@ namespace API.Controllers.Jobs
 
         [HttpPost]
         [Authorize(Policy = "Recruiter")]
-        //[Route("Jobs")]
         public async Task<IActionResult> AddJob(JobDTO job)
         {
             if (ModelState.IsValid)
@@ -84,10 +80,20 @@ namespace API.Controllers.Jobs
         [Route("{id}")]
         public async Task<IActionResult> UpdateJobById(JobDTO job, int id)
         {
-            var info = await _jobService.Update(job, UserId, id);
-            if (info == null)
-                return Ok(new SomeException("Job updated successfully.", info));
-            return NotFound(new SomeException($"Job not found {id}."));
+            if (ModelState.IsValid)
+            {
+                var checkId = await _jobService.GetById(id);
+                if (checkId != null)
+                {
+                    var info = await _jobService.Update(job, UserId, id);
+                    if (info == null)
+                        return Ok(new SomeException("Job updated successfully.", info));
+
+                    return BadRequest(new SomeException("An error occured."));
+                }
+                return NotFound(new SomeException($"Job not found {id}."));
+            }
+            return BadRequest(ModelState);
         }
 
         [HttpDelete]
@@ -95,32 +101,38 @@ namespace API.Controllers.Jobs
         [Route("{id}")]
         public async Task<IActionResult> DeleteJob(int id)
         {
-            var info = await _jobService.Delete(id);
-            if (info != null)
-                return Ok(new SomeException("Job deleted successfully.", info));
+            var checkJob = await _jobService.GetById(id);
+            if (checkJob != null)
+            {
+                var info = await _jobService.Delete(id);
+                if (info != null)
+                    return Ok(new SomeException("Job deleted successfully.", info));
 
+                return BadRequest("An error occured");
+            }
             return NotFound(new SomeException($"Job not found {id}."));
         }
 
         [HttpPost]
-        [Authorize(Policy ="User")]
+        [Authorize(Policy = "User")]
         [Route("Apply")]
         public async Task<IActionResult> ApplyJob(int jobId)
         {
-            if(ModelState.IsValid)
+            var checkJob = await _jobService.GetById(jobId);
+            if (checkJob != null)
             {
                 var chek = await _appliedJobsService.AlreadyAppliedToJob(jobId, UserId);
                 if (chek == false)
                 {
                     var appliedJobStatus = await _appliedJobsService.Add(jobId, UserId);
-                    if(appliedJobStatus != null)
-                        return Ok(appliedJobStatus);
+                    if (appliedJobStatus != null)
+                        return Ok(new SomeException("Applied to job successfully.", appliedJobStatus));
 
                     return BadRequest(new SomeException("An error occured.", appliedJobStatus));
                 }
                 return BadRequest(new SomeException("Already applied to this job."));
             }
-            return BadRequest(new SomeException("Please fill all the details", ModelState));
+            return NotFound(new SomeException($"Job not found {jobId}"));
         }
 
         [HttpGet]
@@ -168,10 +180,15 @@ namespace API.Controllers.Jobs
         [Route("AppliedJobs/{id}")]
         public async Task<IActionResult> DeleteAppliedJob(int id)
         {
-            var result = await _appliedJobsService.Delete(id);
-            if (result != null)
-                return Ok(new SomeException("Job deleted successfully.", result));
+            var checkJob = await _appliedJobsService.GetById(id);
+            if (checkJob != null)
+            {
+                var result = await _appliedJobsService.Delete(checkJob);
+                if (result != null)
+                    return Ok(new SomeException("Job deleted successfully.", result));
 
+                return BadRequest(new SomeException("An error occured.", result));
+            }
             return NotFound(new SomeException($"Job not found {id}."));
         }
     }
