@@ -96,11 +96,11 @@ namespace API.Controllers.Using_ADO.NET
         [HttpPost]
         [AllowAnonymous]
         [Route("Login")]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login(LoginDTO req)
         {
-            if (email != null && password != null)
+            if (ModelState.IsValid)
             {
-                var getUser = await _userServices.GetUser(email, password);
+                var getUser = await _userServices.GetUser(req.Email, req.Password);
                 if(getUser !=null)
                 {
                     var roleInfo = await _roleServices.GetById(getUser.RoleId);
@@ -113,9 +113,9 @@ namespace API.Controllers.Using_ADO.NET
                     obj.Role = roleInfo.Name;
                     return Ok(await _userServices.GenerateToken(obj));
                 }
-                return NotFound(new SomeException("UserName or Password is invalid.", email, password));
+                return NotFound(new SomeException("UserName or Password is invalid.", req.Email, req.Password));
             }
-            return BadRequest(new SomeException("Please enter UserName and Password.", ModelState));
+            return BadRequest(ModelState);
         }
 
         [HttpPost]

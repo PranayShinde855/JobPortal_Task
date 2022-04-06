@@ -23,12 +23,13 @@ namespace Services.UserServices
         private readonly IConfiguration _configuration;
         private readonly IOTPService _oTPService;
         private readonly IRoleService _roleService; 
-        public UserService(IUserRepository userRepositor, IConfiguration configuration, 
-             IRoleService roleService)
+        public UserService(IUserRepository userRepositor, IConfiguration configuration, IOTPService oTPService
+            , IRoleService roleService)
         {
             _userRepository = userRepositor;
             _configuration = configuration;
             _roleService = roleService;
+            _oTPService = oTPService;
         }
 
         public async Task<Users> AddUser(UserRegistrationDTO req)
@@ -49,9 +50,9 @@ namespace Services.UserServices
                 var info = await _userRepository.Add(data);
                 return info;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                throw ex;
+                throw new Exception ( "Error", ex);
             }
         }
         public async Task<Users> AddRecruiter(UserRegistrationDTO req, int userID)
@@ -74,7 +75,7 @@ namespace Services.UserServices
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception ( "Error", ex);
             }
         }
 
@@ -101,7 +102,7 @@ namespace Services.UserServices
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception ( "Error", ex);
             }
         }
 
@@ -124,7 +125,7 @@ namespace Services.UserServices
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception ( "Error", ex);
             }
         }
 
@@ -152,13 +153,12 @@ namespace Services.UserServices
                     smtp.Credentials = new NetworkCredential(_configuration["EMailSettings:Mail"], _configuration["EMailSettings:Password"]);
                     smtp.EnableSsl = true;
                     await smtp.SendMailAsync(mail);
-                    return true;
                 }
-                return false;
+                return true;
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception ( "Error", ex);
             }
         }
 
@@ -209,7 +209,7 @@ namespace Services.UserServices
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception ( "Error", ex);
             }
         }
 
