@@ -15,7 +15,7 @@ namespace ADOServices.ADOServices.Jobs
         private readonly IUserServices _userServices;
         public AppliedJobsServices(IUserServices userServices)
         {
-            _userServices = userServices;
+            _userServices = userServices; 
         }
 
         public async Task<bool> Add(int jobId, int userId)
@@ -79,7 +79,7 @@ namespace ADOServices.ADOServices.Jobs
                 new SqlParameter("@ApplicantId", applicantId),
                 new SqlParameter("@JobId", jobId)
             };
-            EmailRequestDTO obj = await DB<EmailRequestDTO>.GetSingleRecord(query);
+            EmailRequestDTO obj = await DB<EmailRequestDTO>.GetSingleRecord(query, parameters);
             return obj;
         }
 
@@ -121,7 +121,7 @@ namespace ADOServices.ADOServices.Jobs
                             " FROM AppliedJobs aj LEFT JOIN Jobs j ON aj.JobId = j.Id " +
                             "LEFT JOIN Users us ON aj.AppliedBy = us.UserId " +
                             "LEFT JOIN Users ua ON j.CreatedBy = ua.UserId " +
-                            "WHERE aj.AppliedBy = @UserId '";
+                            "WHERE aj.AppliedBy = @UserId ";
             var parameters = new IDataParameter[]
           {
                 new SqlParameter("@UserId", Convert.ToInt32(userId))

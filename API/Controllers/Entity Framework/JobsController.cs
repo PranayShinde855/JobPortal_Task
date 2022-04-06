@@ -3,6 +3,7 @@ using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Models;
 using Models.DTOs;
 using Services.Jobs;
@@ -19,15 +20,16 @@ namespace API.Controllers.Jobs
     {
         private readonly IJobService _jobService;
         private readonly IAppliedJobsService _appliedJobsService;
-
+        private readonly ILogger<JobsController> _logger;
         private readonly IMemoryCache _memoryCache;
         private readonly DbContextModel _dbContext;
         public JobsController(IJobService jobService, IAppliedJobsService appliedJobsService, IUserService userService,
-            IMemoryCache memoryCache, DbContextModel dbContext)
+            ILogger<JobsController> logger , IMemoryCache memoryCache, DbContextModel dbContext)
         {
             _jobService = jobService;
             _appliedJobsService = appliedJobsService;
             _memoryCache = memoryCache;
+            _logger = logger;
             _dbContext = dbContext;
         }
 

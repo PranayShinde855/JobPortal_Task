@@ -76,8 +76,8 @@ namespace API.Controllers
             return BadRequest(ModelState);
         }
 
-        [AllowAnonymous]
         [HttpPost]
+        [AllowAnonymous]
         [Route("User")]
         public async Task<IActionResult> UserRegistration(UserRegistrationDTO req)
         {

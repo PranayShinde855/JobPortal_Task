@@ -7,6 +7,7 @@ namespace Models.DTOs
         [Required(ErrorMessage = "Please enter user name.")]
         [MaxLength(25)]
         public string UserName { get; set; }
+
         [Required(ErrorMessage = "Please enter address.")]
         [MaxLength(50)]
         public string Address { get; set; }
