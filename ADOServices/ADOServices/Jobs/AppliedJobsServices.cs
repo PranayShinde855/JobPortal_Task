@@ -33,8 +33,8 @@ namespace ADOServices.ADOServices.Jobs
             {
                 var email = await EmailDetails(jobId, userId);
                 if (email != null)
-                    await SendMailToUser(email);
-                    await SendMailToRecruiter(email);
+                    await Task.Run(() => SendMailToUser(email));
+                    await Task.Run(() => SendMailToRecruiter(email));
                 return true;
             }
             return false;

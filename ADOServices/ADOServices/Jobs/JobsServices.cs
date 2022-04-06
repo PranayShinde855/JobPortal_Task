@@ -40,7 +40,7 @@ namespace Services.ADOServices.Jobs
 
         public async Task<bool> Delete(int jobId)
         {
-            string query = "select * from Jobs where Id = @JobId";
+            string query = "DELETE Jobs WHERE Id = @JobId";
             var parameters = new IDataParameter[]
             {
                 new SqlParameter("@JobId", Convert.ToInt32(jobId))

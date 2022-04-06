@@ -13,11 +13,6 @@ namespace Services.OTPService
             _oTPRepository = oTPService;
         }
 
-        public Task<OTP> GetAll()
-        {
-            throw new System.NotImplementedException();
-        }
-
         public async Task<OTP> GetByOTP(int otp, int userId)
         {
             return await _oTPRepository.GetDefault(x=>x.Otp == otp && x.UserId == userId);

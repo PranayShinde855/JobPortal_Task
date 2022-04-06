@@ -37,8 +37,8 @@ namespace Services.Jobs
             var getUserDetails = await _userService.GetById(userId);
             var getJobDetails = await _jobService.GetById(jobId);
             var getRecruiterDetails = await _userService.GetById(getJobDetails.CreatedBy);
-            await SendMailToRecruiter(getRecruiterDetails, getJobDetails);
-            await SendMailToUser(getUserDetails, getJobDetails);
+            await Task.Run(() => SendMailToRecruiter(getRecruiterDetails, getJobDetails));
+            await Task.Run(() => SendMailToUser(getUserDetails, getJobDetails));
             return obj;
         }
 

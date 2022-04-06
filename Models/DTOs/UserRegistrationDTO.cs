@@ -16,7 +16,7 @@ namespace Models.DTOs
         [MaxLength(50)]
         public string Email { get; set; }
 
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.\d)(?=.[!@#$%+-_&*])", ErrorMessage = "Please enter password.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%+-_&*])", ErrorMessage = "Please enter password.")]
         [MaxLength(8)]
         public string Password { get; set; }
         public bool IsActive { get; set; }

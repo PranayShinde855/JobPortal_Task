@@ -9,6 +9,5 @@ namespace ADOServices.ADOServices.OTPServices
         Task<int> GenerateOTP(int userId);
         Task<OTP> GetByOTP(int otp, int userId);
         Task<bool> OTPExists(int otp);
-        Task<IEnumerable<OTP>> GetAll();
     }
 }

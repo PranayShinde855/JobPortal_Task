@@ -33,13 +33,6 @@ namespace ADOServices.ADOServices.OTPServices
             goto newOtp;
         }
 
-        public async Task<IEnumerable<OTP>> GetAll()
-        {
-            string query = "SELECT * FROM OTP";
-            IEnumerable<OTP> obj = await DB<OTP>.GetList(query);
-            return obj;
-        }
-
         public async Task<OTP> GetByOTP(int otp, int userId)
         {
             string query = $"SELECT * FROM OTP WHERE otp = @OTP AND UserId = @UserId";
