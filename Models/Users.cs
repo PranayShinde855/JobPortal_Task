@@ -14,10 +14,10 @@ namespace Models
         public string Address { get; set; }
 
         [Required(ErrorMessage = "Please enter email.")]
-        [DataType(DataType.EmailAddress)]
+        [RegularExpression(@"^[a-z0-9A-Z!#$%^&&*/?_`~]+@[a-z0-9A-Z!#$%^&&*/?_`~]+([a-zA-Z]{2,})")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Please enter password.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.\d)(?=.[!@#$%+-_&*])", ErrorMessage = "Please enter password.")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
         public int RoleId { get; set; }

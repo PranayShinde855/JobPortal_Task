@@ -1,4 +1,5 @@
 ﻿using Database;
+using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +13,13 @@ using System.Threading.Tasks;
 namespace API.Controllers.Users
 {
     [Route("api/Users")]
-    [EnableCors("AllowOrigin")]
+    //[EnableCors("AllowOrigin")]
     [ApiController]
     public class ApplicationUserController : BaseController
     {
-        protected readonly IUserService _userSerivce;
-        protected readonly IMemoryCache _memoryCache;
-        protected readonly DbContextModel _dbContext;
+        private readonly IUserService _userSerivce;
+        private readonly IMemoryCache _memoryCache;
+        private readonly DbContextModel _dbContext;
 
         public ApplicationUserController(IUserService userSerivce, IMemoryCache memoryCache, DbContextModel dbContext)
         {
@@ -29,7 +30,6 @@ namespace API.Controllers.Users
 
         [HttpGet]
         [Authorize(Policy ="Admin")]
-        //[Route("Users")]
         public async Task<IActionResult> Get()
         {
             var cacheKey = "result";
@@ -49,39 +49,39 @@ namespace API.Controllers.Users
 
         [HttpGet]
         [Authorize(Policy ="Admin")]
-        [Route("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [Route("{userId}")]
+        public async Task<IActionResult> GetById(int userId)
         {
-            var result = await _userSerivce.GetById(id);
+            var result = await _userSerivce.GetById(userId);
             if (result == null)
                 return NotFound();
 
             return Ok(result);
         }
 
-
+        //User/Recruiter/Admin can update their account
         [HttpPut]
         [Authorize(Policy ="AllAllowed")]
-        [Route("{id}")]
         public async Task<IActionResult> Update(UserRegistrationDTO req)
         {
             var result = await _userSerivce.Update(UserId, req);
             if (result == null)
-                return NotFound();
+                return NotFound(new SomeException("An error occured.", result));
 
-            return Ok(result);
+            return Ok(new SomeException("Updated successfully.", result));
         }
 
+        // Only admin can delete Users/Recruiter/Admin
         [HttpDelete]
         [Authorize(Policy ="Admin")]
-        [Route("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [Route("{userId}")]
+        public async Task<IActionResult> Delete(int userId)
         {
-            var result = await _userSerivce.Delete(id);
+            var result = await _userSerivce.Delete(userId);
             if (result == false)
-                return NotFound();
+                return NotFound(new SomeException($"{userId} does not exist."));
 
-            return Ok(result);
+            return Ok(new SomeException("Deleted successfully", result));
         }
     }
 }

@@ -8,14 +8,14 @@ namespace Services.UserServices
     public interface IUserService
     {
         Task<Users> AddUser(UserRegistrationDTO req);
-        Task<Users> AddRecruiter(UserRegistrationDTO req);
-        Task<Users> AddAdmin(UserRegistrationDTO req);
+        Task<Users> AddRecruiter(UserRegistrationDTO req, int userId);
+        Task<Users> AddAdmin(UserRegistrationDTO req, int userId);
         Task<Users> Update(int Id, UserRegistrationDTO req);
         Task<bool> Delete(int Id);
         Task<Users> GetById(int Id);
         Task<IQueryable<Users>> GetAll();
         Task<Users> GetUser(string email, string password);
-        Task<Users> GetUser(string emil);
+        Task<Users> GetUser(string email);
         Task<bool> ExecuteEmail(string to, string subject, string message);
         Task<bool> ResetPassword(ResetPasswordDTO dTO, int Id);
         Task<bool> CheckEmailIdExist(string Email);

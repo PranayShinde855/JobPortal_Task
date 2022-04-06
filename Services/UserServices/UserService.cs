@@ -54,7 +54,7 @@ namespace Services.UserServices
                 throw ex;
             }
         }
-        public async Task<Users> AddRecruiter(UserRegistrationDTO req)
+        public async Task<Users> AddRecruiter(UserRegistrationDTO req, int userID)
         {
             try
             {
@@ -64,8 +64,8 @@ namespace Services.UserServices
                 data.Password = req.Password;
                 data.Email = req.Email;
                 data.RoleId = 2;
-                data.CreatedBy = 0;
-                data.ModifiedBy = 0;
+                data.CreatedBy = userID;
+                data.ModifiedBy = userID;
                 data.CreatedDate = DateTime.Now;
                 data.ModifiedDate = DateTime.Now;
                 data.IsActive = true;
@@ -107,19 +107,18 @@ namespace Services.UserServices
             }
         }
 
-        public async Task<Users> Update(int id, UserRegistrationDTO req)
+        public async Task<Users> Update(int userId, UserRegistrationDTO req)
         {
             var info = new Users();
             try
             {
-                Users getdata = await _userRepository.GetById(id);
+                Users getdata = await _userRepository.GetById(userId);
                 if (getdata != null)
                 {
                     getdata.UserName = req.UserName;
                     getdata.Address = req.Address;
                     getdata.Password = req.Password;
-                    getdata.Email = req.Email;
-                    getdata.ModifiedBy = id;
+                    getdata.ModifiedBy = userId;
                     getdata.ModifiedDate = DateTime.Now;
                     info = await _userRepository.Update(getdata);
                 }
@@ -191,7 +190,7 @@ namespace Services.UserServices
             return false;
         }
 
-        public async Task<Users> AddAdmin(UserRegistrationDTO req)
+        public async Task<Users> AddAdmin(UserRegistrationDTO req, int userId)
         {
             var info = new Users();
             try
@@ -202,8 +201,8 @@ namespace Services.UserServices
                 data.Password = req.Password;
                 data.Email = req.Email;
                 data.RoleId = 1;
-                data.CreatedBy = 0;
-                data.ModifiedBy = 0;
+                data.CreatedBy = userId;
+                data.ModifiedBy = userId;
                 data.CreatedDate = DateTime.Now;
                 data.ModifiedDate = DateTime.Now;
                 data.IsActive = true;

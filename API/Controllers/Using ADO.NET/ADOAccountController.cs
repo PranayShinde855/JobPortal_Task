@@ -2,6 +2,7 @@
 using ADOServices.ADOServices.UserServices;
 using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Models.DTOs;
@@ -11,12 +12,13 @@ using System.Threading.Tasks;
 namespace API.Controllers.Using_ADO.NET
 {
     [Route("api/ADO/Account")]
+    //[EnableCors("AllowOrigin")]
     [ApiController]
-    public class ADOAccountController : ControllerBase
+    public class ADOAccountController : BaseController
     {
-        public readonly IUserServices _userServices;
-        public readonly IOTPServices _oTPServices;
-        public readonly IRoleServices _roleServices;
+        private readonly IUserServices _userServices;
+        private readonly IOTPServices _oTPServices;
+        private readonly IRoleServices _roleServices;
         private readonly ILogger<ADOAccountController> _logger;
         public ADOAccountController(IUserServices userServices, IOTPServices oTPServices, IRoleServices roleServices
             , ILogger<ADOAccountController> logger)
@@ -37,18 +39,18 @@ namespace API.Controllers.Using_ADO.NET
                 var checkEmail = await _userServices.CheckEmailIdExist(req.Email);
                 if (checkEmail == false)
                 {
-                    var info = await _userServices.AddAdmin(req);
+                    var info = await _userServices.AddAdmin(req, UserId);
                     if (info == true)
                         return Ok(new  SomeException ("Saved", req));
                 }
                 return NotFound(new SomeException("This email address is already taken." +
                     " Please use another eamil address.", req.Email));
             }
-            return BadRequest(new SomeException("Required fileds ", ModelState));
+            return BadRequest(ModelState);
         }
 
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize("Admin")]
         [Route("Recruiter")]
         public async Task<IActionResult> RecruiterRegistration(UserRegistrationDTO req)
         {
@@ -57,14 +59,14 @@ namespace API.Controllers.Using_ADO.NET
                 var checkEmail = await _userServices.CheckEmailIdExist(req.Email);
                 if (checkEmail == false)
                 {
-                    var info = await _userServices.AddRecruiter(req);
+                    var info = await _userServices.AddRecruiter(req, UserId);
                     if (info == true)
                         return Ok(new SomeException("Saved", info));
                 }
                 return NotFound(new SomeException("This email address is already taken." +
                     " Please use another eamil address.", req.Email));
             }
-            return BadRequest(new SomeException("Please fill all the details.", ModelState));
+            return BadRequest(ModelState);
         }
 
         [HttpPost]
@@ -84,7 +86,7 @@ namespace API.Controllers.Using_ADO.NET
                 return NotFound(new SomeException("This email address is already taken." +
                     " Please use another eamil address.", req.Email));
             }
-            return BadRequest(new SomeException("Please fill all the details.", ModelState));
+            return BadRequest(ModelState);
         }
 
         [HttpPost]
@@ -126,24 +128,35 @@ namespace API.Controllers.Using_ADO.NET
 
                 return BadRequest(new SomeException("An error occured.", sendMail));
             }
-            return BadRequest(new SomeException("Email does not exist.", email));
+            return BadRequest(new SomeException($"{email} Email does not exist."));
         }
 
         [HttpPost]
         [AllowAnonymous]
         [Route("ResetPassword")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordDTO dto)
+        public async Task<IActionResult> ResetPassword(ResetPasswordDTO req)
         {
-            var getUser = await _oTPServices.GetByOTP(dto.OTP);
-            if (getUser != null)
+            if (req.Password == req.ConfirmPassword)
             {
-                var result = await _userServices.ResetPassword(dto, getUser.UserId);
-                if (result == true)
-                    return Ok(new SomeException("Password reset successfully.", result));
+                var checkEmail = await _userServices.GetUser(req.Email);
+                if (checkEmail != null)
+                {
+                    var getUser = await _oTPServices.GetByOTP(req.OTP);
+                    if (getUser != null)
+                    {
+                        var result = await _userServices.ResetPassword(req, getUser.UserId);
+                        if (result == true)
+                            return Ok(new SomeException("Password reset successfully.", result));
 
-                return BadRequest(new SomeException("An error occured.", result));
+                        return BadRequest(new SomeException("An error occured.", result));
+                    }
+                    return NotFound(new SomeException("Invalid OTP.", getUser));
+                }
+                return BadRequest(new SomeException($"{req.Email} does not exist."));
+
             }
-            return NotFound(new SomeException("Please enter OTP send to email.", getUser));
+
+            return BadRequest(new SomeException("Password and Confirm Password should be same."));
         }
     }
 }

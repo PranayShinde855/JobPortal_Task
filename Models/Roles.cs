@@ -6,7 +6,9 @@ namespace Models
     public class Roles
     {
         public int Id { get; set; }
+
         [Required(ErrorMessage = "Please enter role.")]
+        [MaxLength(20)]
         public string Name { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }

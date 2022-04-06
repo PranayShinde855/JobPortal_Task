@@ -10,8 +10,8 @@ namespace ADOServices.ADOServices.UserServices
         Task<Users> GetById(int id);
         Task<IEnumerable<Users>> GetAll();
         Task<bool> AddUser(UserRegistrationDTO user);
-        Task<bool> AddRecruiter(UserRegistrationDTO user);
-        Task<bool> AddAdmin(UserRegistrationDTO user);
+        Task<bool> AddRecruiter(UserRegistrationDTO user, int userId);
+        Task<bool> AddAdmin(UserRegistrationDTO user, int userId);
         Task<bool> Update(int userId, UserRegistrationDTO user);
         Task<bool> Delete(int Id);
         Task<Users> GetUser(string email, string password);

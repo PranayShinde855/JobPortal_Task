@@ -2,6 +2,7 @@
 using Database;
 using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -13,14 +14,15 @@ using System.Threading.Tasks;
 namespace API.Controllers.Using_ADO.NET
 {
     [Route("api/ADO/Jobs")]
+    //[EnableCors("AllowOrigin")]
     [ApiController]
     public class ADOJobsController : BaseController
     {
-        protected readonly IJobsServices _jobsServiceADO;
-        protected readonly IAppliedJobsServices _appliedJobsServicesADO;
-        protected readonly ILogger<ADOJobsController> _logger;
-        protected readonly IMemoryCache _memoryCache;
-        protected readonly DbContextModel _dbContext;
+        private readonly IJobsServices _jobsServiceADO;
+        private readonly IAppliedJobsServices _appliedJobsServicesADO;
+        private readonly ILogger<ADOJobsController> _logger;
+        private readonly IMemoryCache _memoryCache;
+        private readonly DbContextModel _dbContext;
         public ADOJobsController(IJobsServices jobsServiceADO, IAppliedJobsServices appliedJobsServicesADO, ILogger<ADOJobsController> logger
             , IMemoryCache memoryCache, DbContextModel dbContext)
         {

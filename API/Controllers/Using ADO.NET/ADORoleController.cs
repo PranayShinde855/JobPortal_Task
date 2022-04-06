@@ -1,6 +1,7 @@
 ﻿using Database;
 using GlobalExceptionHandling.WebApi;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -12,14 +13,15 @@ using System.Threading.Tasks;
 namespace API.Controllers.Using_ADO.NET
 {
     [Route("api/ADO/Roles")]
+    //[EnableCors("AllowOrigin")]
     [ApiController]
     [Authorize(Policy = "Admin")]
     public class ADORoleController : BaseController
     {
-        protected readonly IRoleServices _roleServices;
-        protected readonly ILogger<ADORoleController> _logger;
-        protected readonly IMemoryCache _memoryCache;
-        protected readonly DbContextModel _dbContext;
+        private readonly IRoleServices _roleServices;
+        private readonly ILogger<ADORoleController> _logger;
+        private readonly IMemoryCache _memoryCache;
+        private readonly DbContextModel _dbContext;
 
         public ADORoleController(IRoleServices roleServices, ILogger<ADORoleController> logger,
             IMemoryCache memoryCache, DbContextModel dbContext)

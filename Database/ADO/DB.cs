@@ -60,7 +60,6 @@ namespace Database.ADO
 
         public async static Task<T> GetSingleRecord(string sql, IDataParameter[] parameters)
         {
-            var tcs = new TaskCompletionSource<List<T>>();
             DataSet ds = new DataSet();
             using (SqlConnection con = new SqlConnection(source))
             {
@@ -88,7 +87,7 @@ namespace Database.ADO
 
         public async static Task<T> GetSingleRecord(string sql)
         {
-            var tcs = new TaskCompletionSource<List<T>>();
+            
             DataSet ds = new DataSet();
             using (SqlConnection con = new SqlConnection(source))
             {
@@ -112,7 +111,7 @@ namespace Database.ADO
 
         public async static Task<IEnumerable<T>> GetList(string sql, IDataParameter[] parameters)
         {
-            var tcs = new TaskCompletionSource<List<T>>();
+            
             DataSet ds = new DataSet();
             using (SqlConnection con = new SqlConnection(source))
             {
@@ -140,7 +139,7 @@ namespace Database.ADO
 
         public async static Task<IEnumerable<T>> GetList(string sql)
         {
-            var tcs = new TaskCompletionSource<List<T>>();
+            
             DataSet ds = new DataSet();
             using (SqlConnection con = new SqlConnection(source))
             {

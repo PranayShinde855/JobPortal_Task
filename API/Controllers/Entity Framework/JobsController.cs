@@ -15,15 +15,15 @@ using System.Threading.Tasks;
 namespace API.Controllers.Jobs
 {
     [Route("api/Jobs")]
-    [EnableCors("AllowOrigin")]
+    //[EnableCors("AllowOrigin")]
     [ApiController]
     public class JobsController : BaseController
     {
         private readonly IJobService _jobService;
         private readonly IAppliedJobsService _appliedJobsService;
 
-        protected readonly IMemoryCache _memoryCache;
-        protected readonly DbContextModel _dbContext;
+        private readonly IMemoryCache _memoryCache;
+        private readonly DbContextModel _dbContext;
         public JobsController(IJobService jobService, IAppliedJobsService appliedJobsService, IUserService userService,
             IMemoryCache memoryCache, DbContextModel dbContext)
         {

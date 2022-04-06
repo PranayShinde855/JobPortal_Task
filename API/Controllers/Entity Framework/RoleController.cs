@@ -11,15 +11,15 @@ using System.Threading.Tasks;
 namespace API.Controllers.Roles
 {
     [Route("api/Roles")]
-    [EnableCors("AllowOrigin")]
+    //[EnableCors("AllowOrigin")]
     [ApiController]
     [Authorize(Policy ="Admin")]
     public class RoleController : BaseController
     {
         private readonly IRoleService _roleService;
 
-        protected readonly IMemoryCache _memoryCache;
-        protected readonly DbContextModel _dbContext;
+        private readonly IMemoryCache _memoryCache;
+        private readonly DbContextModel _dbContext;
         public RoleController(IRoleService roleService, IMemoryCache memoryCache, DbContextModel dbContext)
         {
             _roleService = roleService;

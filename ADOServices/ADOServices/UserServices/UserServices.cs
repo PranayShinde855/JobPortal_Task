@@ -30,7 +30,7 @@ namespace ADOServices.ADOServices.UserServices
             _oTPServices = oTPServices;
         }
 
-        public async Task<bool> AddAdmin(UserRegistrationDTO user)
+        public async Task<bool> AddAdmin(UserRegistrationDTO user, int userId)
         {
             string query = "INSERT INTO Users(UserName, Address, Email, Password, RoleId, CreatedBy, ModifiedBy," +
                 " CreatedDate, ModifiedDate, IsActive) VALUES(@UserName, @Address, @Email, @Password, @RoleId, @CreatedBy, " +
@@ -43,8 +43,8 @@ namespace ADOServices.ADOServices.UserServices
                 new SqlParameter("@Email", Convert.ToString(user.Email)),
                 new SqlParameter("@Password", Convert.ToString(user.Password)),
                 new SqlParameter("@RoleId", Convert.ToInt32(1)),
-                new SqlParameter("@CreatedBy", Convert.ToInt32(0)),
-                new SqlParameter("@ModifiedBy", Convert.ToInt32(0)),
+                new SqlParameter("@CreatedBy", Convert.ToInt32(userId)),
+                new SqlParameter("@ModifiedBy", Convert.ToInt32(userId)),
                 new SqlParameter("@CreatedDate", Convert.ToDateTime(DateTime.Now)),
                 new SqlParameter("@ModifiedDate", Convert.ToDateTime(DateTime.Now)),
                 new SqlParameter("@IsActive", Convert.ToBoolean(true))
@@ -56,7 +56,7 @@ namespace ADOServices.ADOServices.UserServices
             return false;
         }
 
-        public async Task<bool> AddRecruiter(UserRegistrationDTO user)
+        public async Task<bool> AddRecruiter(UserRegistrationDTO user, int userId)
         {
             string query = "INSERT INTO Users(UserName, Address, Email, Password, RoleId, CreatedBy, ModifiedBy," +
                 " CreatedDate, ModifiedDate, IsActive) VALUES(@UserName, @Address, @Email, @Password, @RoleId, @CreatedBy, " +
@@ -68,8 +68,8 @@ namespace ADOServices.ADOServices.UserServices
                 new SqlParameter("@Email", Convert.ToString(user.Email)),
                 new SqlParameter("@Password", Convert.ToString(user.Password)),
                 new SqlParameter("@RoleId", Convert.ToInt32(2)),
-                new SqlParameter("@CreatedBy", Convert.ToInt32(0)),
-                new SqlParameter("@ModifiedBy", Convert.ToInt32(0)),
+                new SqlParameter("@CreatedBy", Convert.ToInt32(userId)),
+                new SqlParameter("@ModifiedBy", Convert.ToInt32(userId)),
                 new SqlParameter("@CreatedDate", Convert.ToDateTime(DateTime.Now)),
                 new SqlParameter("@ModifiedDate", Convert.ToDateTime(DateTime.Now)),
                 new SqlParameter("@IsActive", Convert.ToBoolean(true))
@@ -141,6 +141,7 @@ namespace ADOServices.ADOServices.UserServices
                 {
                     From = new MailAddress(_configuration["EMailSettings:Mail"], _configuration["EMailSettings:DisplayName"])
                 };
+
                 to.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(t => mail.To.Add(new MailAddress(t)));
                 mail.Subject = subject;
                 mail.Body = message;
@@ -152,9 +153,8 @@ namespace ADOServices.ADOServices.UserServices
                     smtp.Credentials = new NetworkCredential(_configuration["EMailSettings:Mail"], _configuration["EMailSettings:Password"]);
                     smtp.EnableSsl = true;
                     await smtp.SendMailAsync(mail);
-                    return true;
                 }
-                return false;
+                return true;
             }
             catch (Exception ex)
             {
@@ -208,8 +208,13 @@ namespace ADOServices.ADOServices.UserServices
 
         public async Task<Users> GetUser(string email, string password)
         {
-            string query = "SELECT * FROM Users WHERE Email = '" + email + "' AND Password = '" + password + "' ";
-            Users obj = await DB<Users>.GetSingleRecord(query);
+            string query = "SELECT * FROM Users WHERE Email = @Email AND Password = @Password ";
+            var parameters = new IDataParameter[]
+           {
+                new SqlParameter("@Email", Convert.ToString(email)),
+                new SqlParameter("@Password", Convert.ToString(password)),
+           };
+            Users obj = await DB<Users>.GetSingleRecord(query, parameters);
             return obj;
         }
 
@@ -258,16 +263,17 @@ namespace ADOServices.ADOServices.UserServices
             JObject jobject = JObject.Parse(serialize);
             string query = "Update Users SET UserName = @UserName, Address = @Address, Password = @Password" +
                 ", ModifiedBy = @ModifiedBy, ModifiedDate = @ModifiedDate, IsActive = @IsActive " +
-                "WHERE UserId = '"+ userId +"' ";
+                "WHERE UserId = @UserId ";
 
             var parameters = new IDataParameter[]
             {
                 new SqlParameter("@UserName", jobject["UserName"].ToString()),
                 new SqlParameter("@Address", jobject["Address"].ToString()),
                 new SqlParameter("@Password",jobject["Password"].ToString()),
-                new SqlParameter("@ModifiedBy", userId),
-                new SqlParameter("@ModifiedDate", DateTime.Now),
-                new SqlParameter("@IsActive", user.IsActive),
+                new SqlParameter("@ModifiedBy", Convert.ToInt32(userId)),
+                new SqlParameter("@ModifiedDate", Convert.ToDateTime(DateTime.Now)),
+                new SqlParameter("@IsActive", Convert.ToBoolean(user.IsActive)),
+                new SqlParameter("@UserId", Convert.ToInt32(userId)),
            };
 
             var data = await DB<Users>.ExecuteData(query, parameters);
