@@ -17,7 +17,7 @@ namespace Models
         [RegularExpression(@"^[a-z0-9A-Z!#$%^&&*/?_`~]+@[a-z0-9A-Z!#$%^&&*/?_`~]+([a-zA-Z].{2,})$", ErrorMessage = "Please enter email.")]
         public string Email { get; set; }
 
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.\d)(?=.[!@#$%+-_&*])", ErrorMessage = "Please enter password.")]
+        [RegularExpression(@"[0-9]+[A-Z]+.{8,15}[a-z]+[!@#$%^&*()_+=\[{\]};:<>|./?,-]", ErrorMessage = "Password should contains alteast one small letter, one captial letter, one digit and one special character.")]
         public string Password { get; set; }
         public int RoleId { get; set; }
         public int CreatedBy { get; set; }

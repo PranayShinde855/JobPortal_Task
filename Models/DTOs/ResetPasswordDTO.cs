@@ -12,11 +12,11 @@ namespace Models.DTOs
         [MaxLength(4)]
         public int OTP { get; set; }
 
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.\d)(?=.[!@#$%+-_&*])", ErrorMessage = "Please enter password.")]
+        [RegularExpression(@"[0-9]+[A-Z]+.{8,8}[a-z]+[!@#$%^&*()_+=\[{\]};:<>|./?,-]", ErrorMessage = "Password should contains alteast one small letter, one captial letter, one digit and one special character.")]
         [MaxLength(8)]
         public string Password { get; set; }
 
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.\d)(?=.[!@#$%+-_&*])", ErrorMessage = "Please enter password.")]
+        [RegularExpression(@"[0-9]+[A-Z]+.{8,8}[a-z]+[!@#$%^&*()_+=\[{\]};:<>|./?,-]", ErrorMessage = "Password should contains alteast one small letter, one captial letter, one digit and one special character.")]
         [MaxLength(8)]
         public string ConfirmPassword { get; set; }
     }
