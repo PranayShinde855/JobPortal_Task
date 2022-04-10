@@ -29,10 +29,18 @@ namespace API.Controllers.Users
 
         [HttpGet]
         [Authorize(Policy ="Admin")]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAllUsers()
         {
-            var cacheKey = "result";
-            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Models.Users> result))
+            var cacheKey = string.Empty;
+            object isExist = null;
+            IEnumerable<Models.Users> result = null;
+            if (UserId != 0)
+            {
+                cacheKey = "User" + UserId.ToString();
+                isExist = _memoryCache.Get(cacheKey);
+            }
+
+            if (isExist == null)
             {
                 result = await _userSerivce.GetAll();
                 var cacheExpiryOptions = new MemoryCacheEntryOptions
@@ -43,13 +51,17 @@ namespace API.Controllers.Users
                 };
                 _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
             }
+            else
+            {
+                result = (IEnumerable<Models.Users>)isExist;
+            }
             return Ok(result);
         }
 
         [HttpGet]
         [Authorize(Policy ="Admin")]
         [Route("{userId}")]
-        public async Task<IActionResult> GetById(int userId)
+        public async Task<IActionResult> GetUserById(int userId)
         {
             var result = await _userSerivce.GetById(userId);
             if (result == null)
@@ -61,7 +73,7 @@ namespace API.Controllers.Users
         //User/Recruiter/Admin can update their account
         [HttpPut]
         [Authorize(Policy ="AllAllowed")]
-        public async Task<IActionResult> Update(UserRegistrationDTO req)
+        public async Task<IActionResult> UpdateUser(UserRegistrationDTO req)
         {
             if (ModelState.IsValid)
             {
@@ -78,7 +90,7 @@ namespace API.Controllers.Users
         [HttpDelete]
         [Authorize(Policy ="Admin")]
         [Route("{userId}")]
-        public async Task<IActionResult> Delete(int userId)
+        public async Task<IActionResult> DeleteUser(int userId)
         {
             var checkUser = await _userSerivce.GetById(userId);
             if (checkUser != null)

@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 namespace API.Controllers.Using_ADO.NET
 {
     [Route("api/ADO/Roles")]
-    //[EnableCors("AllowOrigin")]
     [ApiController]
     [Authorize(Policy = "Admin")]
     public class ADORoleController : BaseController
@@ -33,11 +32,18 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpGet]
-        //[Route("Roles")]
-        public async Task<IActionResult> GetRoles()
+        public async Task<IActionResult> GetAllRoles()
         {
-            var cacheKey = "result";
-            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Models.Roles> result))
+            var cacheKey = string.Empty;
+            object isExist = null;
+            IEnumerable<Models.Roles> result = null;
+            if (UserId != 0)
+            {
+                cacheKey = "Users_" + UserId.ToString();
+                isExist = _memoryCache.Get(cacheKey);
+            }
+
+            if (isExist == null)
             {
                 result = await _roleServices.GetAll();
                 var cacheExpiryOptions = new MemoryCacheEntryOptions
@@ -47,6 +53,10 @@ namespace API.Controllers.Using_ADO.NET
                     SlidingExpiration = TimeSpan.FromMinutes(2)
                 };
                 _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
+            }
+            else
+            {
+                result = (IEnumerable<Models.Roles>)isExist;
             }
             return Ok(result);
         }
@@ -63,7 +73,6 @@ namespace API.Controllers.Using_ADO.NET
         }
 
         [HttpPost]
-        //[Route("Roles")]
         public async Task<IActionResult> AddRole(string role)
         {
             if (role != null)

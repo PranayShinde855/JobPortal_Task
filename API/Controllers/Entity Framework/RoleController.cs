@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 namespace API.Controllers.Roles
 {
     [Route("api/Roles")]
-    //[EnableCors("AllowOrigin")]
     [ApiController]
     [Authorize(Policy ="Admin")]
     public class RoleController : BaseController
@@ -27,12 +26,19 @@ namespace API.Controllers.Roles
             _dbContext = dbContext;
         }
 
-        [HttpGet]
-        //[Route("Roles")]
+        [HttpGet]        
         public async Task<IActionResult> GetRoles()
         {
-            var cacheKey = "result";
-            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Models.Roles> result))
+            var cacheKey = string.Empty;
+            object isExist = null;
+            IEnumerable<Models.Roles> result = null;
+            if (UserId != 0)
+            {
+                cacheKey = "Users_" + UserId.ToString();
+                isExist = _memoryCache.Get(cacheKey);
+            }
+
+            if (isExist == null)
             {
                 result = await _roleService.GetAll();
                 var cacheExpiryOptions = new MemoryCacheEntryOptions
@@ -42,6 +48,10 @@ namespace API.Controllers.Roles
                     SlidingExpiration = TimeSpan.FromMinutes(2)
                 };
                 _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
+            }
+            else
+            {
+                result = (IEnumerable<Models.Roles>)isExist;
             }
             return Ok(result);
         }
@@ -54,7 +64,6 @@ namespace API.Controllers.Roles
         }
 
         [HttpPost]
-        //[Route("Roles")]
         public async Task<IActionResult> AddRole(string role)
         {
             if(ModelState.IsValid)

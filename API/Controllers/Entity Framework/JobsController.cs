@@ -37,8 +37,16 @@ namespace API.Controllers.Jobs
         [Authorize(Policy ="AllAllowed")]
         public async Task<IActionResult> GetAllJobs()
         {
-            var cacheKey = "result";
-            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Models.Job> result))
+            var cacheKey = string.Empty;
+            object isExist = null;
+            IEnumerable<Models.Job> result = null;
+            if (UserId != 0)
+            {
+                cacheKey = "User_" + UserId.ToString();
+                isExist = _memoryCache.Get(cacheKey);
+            }
+
+            if (isExist == null)
             {
                 result = await _jobService.GetAll();
                 var cacheExpiryOptions = new MemoryCacheEntryOptions
@@ -49,8 +57,12 @@ namespace API.Controllers.Jobs
                 };
                 _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
             }
-            return Ok(result);
-        }
+            else
+            {
+                result = (IEnumerable<Models.Job>)isExist;
+            }
+                return Ok(result);
+            }
 
         [HttpGet]
         [Authorize(Policy ="AllAllowed")]
@@ -142,9 +154,18 @@ namespace API.Controllers.Jobs
         [Route("AppliedJobs")]
         public async Task<IActionResult> GetAllApplicantAppliedToMyJobs()
         {
-            var cacheKey = "result";
-            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<AppliedJobDTO> result ))
+            var cacheKey = string.Empty;
+            object isExist = null;
+            IEnumerable<AppliedJobDTO> result = null;
+            if (UserId != 0)
             {
+                cacheKey = "Recruiter_" + UserId.ToString();
+                isExist = _memoryCache.Get(cacheKey);
+            }
+
+            if (isExist == null)
+            {
+
                 result = await _appliedJobsService.GetAllApplicantAppliedToMyJobs(UserId);
                 var cacheExpiryOptions = new MemoryCacheEntryOptions
                 {
@@ -154,6 +175,10 @@ namespace API.Controllers.Jobs
                 };
                 _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
             }
+            else
+            {
+                result = (IEnumerable<AppliedJobDTO>)isExist;
+            }
             return Ok(result);
         }
 
@@ -162,8 +187,16 @@ namespace API.Controllers.Jobs
         [Route("Applicants/AppliedJobs")]
         public async Task<IActionResult> GetAllJobsAppliedByMe()
         {
-            var cacheKey = "result";
-            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<AppliedJobDTO> result))
+            var cacheKey = string.Empty;
+            object isExist = null;
+            IEnumerable<AppliedJobDTO> result = null;
+            if (UserId != 0)
+            {
+                cacheKey = "Applicant_" + UserId.ToString();
+                isExist = _memoryCache.Get(cacheKey);
+            }
+
+            if (isExist == null)
             {
                 result = await _appliedJobsService.GetAllJobsAppliedByMe(UserId);
                 var cacheExpiryOptions = new MemoryCacheEntryOptions
@@ -173,6 +206,10 @@ namespace API.Controllers.Jobs
                     SlidingExpiration = TimeSpan.FromMinutes(2)
                 };
                 _memoryCache.Set(cacheKey, result, cacheExpiryOptions);
+            }
+            else
+            {
+                result = (IEnumerable<AppliedJobDTO>)isExist;
             }
             return Ok(result);
         }
