@@ -42,7 +42,7 @@ namespace API.Controllers.Jobs
             IEnumerable<Models.Job> result = null;
             if (UserId != 0)
             {
-                cacheKey = "User_" + UserId.ToString();
+                cacheKey = "Jobs_" + UserId.ToString();
                 isExist = _memoryCache.Get(cacheKey);
             }
 
